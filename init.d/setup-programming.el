@@ -54,22 +54,6 @@
   :ensure t
   :bind (("C-c m" . magit-status)))
 
-; AUTO COMPLETION
-(use-package company
-;  :init (global-company-mode)
-  :config
-  (progn
-    (defun indent-or-complete ()
-      (interactive)
-      (if (looking-at "\\_>")
-          (company-complete-common)
-        (indent-according-to-mode)))
-
-    (global-set-key "\t" 'indent-or-complete)))
-
-
-(use-package command-log-mode
-  :ensure t)
 
 (defun live-coding ()
   (interactive)

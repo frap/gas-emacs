@@ -1,6 +1,24 @@
+(eval-when-compile (require 'cl-lib))
+;(require 'cl)
+
+;; functional
+(use-package dash
+  :ensure t
+  :config (eval-after-load "dash" '(dash-enable-font-lock)))
+
+;; string manipulation
+(use-package s
+  :ensure t)
+;; File manipulation
+(use-package f
+  :ensure t)
+
 ;; Keep emacs customize settings in separate file
-(setq custom-file (expand-file-name "emacs-custom.el" user-emacs-directory))
-(load custom-file)
+
+(setq custom-file (expand-file-name "custom.el" user-emacs-directory))
+     (when (file-exists-p custom-file)
+       (load custom-file))
+
 
 ;; Write backup files to own directory
 (setq backup-directory-alist

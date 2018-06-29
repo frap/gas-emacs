@@ -1,6 +1,6 @@
 (use-package clojure-mode
   :ensure t
-  :delight "λ"
+  :delight "☯"
   :init
   (defconst clojure--prettify-symbols-alist
     '(("fn"   . ?λ)
@@ -15,14 +15,14 @@
       ))
   :config
   (add-hook 'clojure-mode-hook 'yas-minor-mode)
-  (diminish 'yas-minor-mode)
+  (delight 'yas-minor-mode)
   (add-hook 'clojure-mode-hook 'subword-mode)
   (add-hook 'clojure-mode-hook 'global-prettify-symbols-mode))
 
 
 (use-package aggressive-indent
     :ensure t
-    :diminish aggressive-indent-mode
+    :delight aggressive-indent-mode
     :config
     (add-hook 'clojure-mode-hook 'aggressive-indent-mode))
 
@@ -42,10 +42,11 @@
   (setq cider-repl-display-help-banner nil)
   (setq cider-cljs-lein-repl "(do (use 'figwheel-sidecar.repl-api) (start-figwheel!) (cljs-repl))")
 
-  :bind (("M-r" . cider-namespace-refresh)
-         ("C-c r" . cider-repl-reset)
-         ("C-c ." . cider-reset-test-run-tests))
-  )
+  :bind  ("C-c r" . cider-repl-reset)
+         ("C-c ." . cider-reset-test-run-tests)
+;;(  cider-namespace-refresh)
+)
+
 
 ;(use-package clj-refactor
 ;  :ensure t
@@ -60,7 +61,7 @@
 ;      (setq cljr-warn-on-eval nil)
  ;     (setq cljr-favor-prefix-notation nil)
 
-;  :diminish clj-refactor-mode
+;  :delight "☠♅"
 ;)
 
 (defun cider-repl-command (cmd)

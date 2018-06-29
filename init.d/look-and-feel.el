@@ -2,7 +2,7 @@
 ;;(when (member "Input" (font-family-list)) (set-frame-font "InputSerifNarrow-12" t t))
 ;(when (member "Menlo" (font-family-list)) (set-frame-font "Menlo-14" t t))
 (when (window-system)
-  (set-default-font "Hack")) ;; was "Fira Code"
+  (set-frame-font "Hack-13" t t)) ;; was "Fira Code"
 ;(when (member "Inconsolata" (font-family-list)) (set-frame-font "Inconsolata-17" t t))
 ;;(set-frame-font "Anonymous Pro-14")
 
@@ -25,14 +25,14 @@
 ;(add-to-list 'custom-theme-load-path "~/.emacs.d/lib/monokai-theme")
 ;(load-theme 'monokai t)
 
-;(color-theme-sanityinc-solarized-dark)
+(color-theme-sanityinc-solarized-dark)
 ;(color-theme-sanityinc-solarized-light)
 ;(color-theme-sanityinc-tomorrow-blue)
 ;(color-theme-sanityinc-tomorrow-bright)
 ;(color-theme-sanityinc-tomorrow-eighties)
 
-;; (color-theme-sanityinc-tomorrow-day)
-(color-theme-sanityinc-tomorrow-night)
+;;(color-theme-sanityinc-tomorrow-day)
+;;(color-theme-sanityinc-tomorrow-night)
 
 
 ;; (add-hook 'prog-mode-hook
@@ -80,52 +80,53 @@
 (use-package dash
   :ensure t)
 
-(use-package outshine
-  :ensure t
-  :config
-  (add-hook 'outline-minor-mode-hook 'outshine-hook-function)
-  (add-hook 'prog-mode-hook 'outline-minor-mode)
-)
 
-(defun -add-font-lock-kwds (FONT-LOCK-ALIST)
-  (font-lock-add-keywords
-   nil (--map (-let (((rgx uni-point) it))
-                `(,rgx (0 (progn
-                            (compose-region (match-beginning 1) (match-end 1)
-                                            ,(concat "\t" (list uni-point)))
-                            nil))))
-              FONT-LOCK-ALIST)))
+;; (use-package outshine
+;;   :ensure t
+;;   :config
+;;   (add-hook 'outline-minor-mode-hook 'outshine-hook-function)
+;;   (add-hook 'prog-mode-hook 'outline-minor-mode)
+;; )
 
-(defmacro add-font-locks (FONT-LOCK-HOOKS-ALIST)
-  `(--each ,FONT-LOCK-HOOKS-ALIST
-     (-let (((font-locks . mode-hooks) it))
-       (--each mode-hooks
-         (add-hook it (-partial '-add-font-lock-kwds
-                                (symbol-value font-locks)))))))
+;; (defun -add-font-lock-kwds (FONT-LOCK-ALIST)
+;;   (font-lock-add-keywords
+;;    nil (--map (-let (((rgx uni-point) it))
+;;                 `(,rgx (0 (progn
+;;                             (compose-region (match-beginning 1) (match-end 1)
+;;                                             ,(concat "\t" (list uni-point)))
+;;                             nil))))
+;;               FONT-LOCK-ALIST)))
 
-(defconst emacs-outlines-font-lock-alist
-  ;; Outlines
-  '(("\\(^;;;\\) "          ?■)
-    ("\\(^;;;;\\) "         ?○)
-    ("\\(^;;;;;\\) "        ?✸)
-    ("\\(^;;;;;;\\) "       ?✿)))
+;; (defmacro add-font-locks (FONT-LOCK-HOOKS-ALIST)
+;;   `(--each ,FONT-LOCK-HOOKS-ALIST
+;;      (-let (((font-locks . mode-hooks) it))
+;;        (--each mode-hooks
+;;          (add-hook it (-partial '-add-font-lock-kwds
+;;                                 (symbol-value font-locks)))))))
 
-(defconst lisp-outlines-font-lock-alist
-  ;; Outlines
-  '(("\\(^;; \\*\\) "          ?■)
-    ("\\(^;; \\*\\*\\) "       ?○)
-    ("\\(^;; \\*\\*\\*\\) "    ?✸)
-    ("\\(^;; \\*\\*\\*\\*\\) " ?✿)))
+;; (defconst emacs-outlines-font-lock-alist
+;;   ;; Outlines
+;;   '(("\\(^;;;\\) "          ?■)
+;;     ("\\(^;;;;\\) "         ?○)
+;;     ("\\(^;;;;;\\) "        ?✸)
+;;     ("\\(^;;;;;;\\) "       ?✿)))
 
-(defconst python-outlines-font-lock-alist
-  '(("\\(^# \\*\\) "          ?■)
-    ("\\(^# \\*\\*\\) "       ?○)
-    ("\\(^# \\*\\*\\*\\) "    ?✸)
-    ("\\(^# \\*\\*\\*\\*\\) " ?✿)))
+;; (defconst lisp-outlines-font-lock-alist
+;;   ;; Outlines
+;;   '(("\\(^;; \\*\\) "          ?■)
+;;     ("\\(^;; \\*\\*\\) "       ?○)
+;;     ("\\(^;; \\*\\*\\*\\) "    ?✸)
+;;     ("\\(^;; \\*\\*\\*\\*\\) " ?✿)))
 
-(add-font-locks
- '((emacs-outlines-font-lock-alist emacs-lisp-mode-hook)
-   (lisp-outlines-font-lock-alist clojure-mode-hook hy-mode-hook)
-   (python-outlines-font-lock-alist python-mode-hook)))
+;; (defconst python-outlines-font-lock-alist
+;;   '(("\\(^# \\*\\) "          ?■)
+;;     ("\\(^# \\*\\*\\) "       ?○)
+;;     ("\\(^# \\*\\*\\*\\) "    ?✸)
+;;     ("\\(^# \\*\\*\\*\\*\\) " ?✿)))
+
+;; (add-font-locks
+;;  '((emacs-outlines-font-lock-alist emacs-lisp-mode-hook)
+;;    (lisp-outlines-font-lock-alist clojure-mode-hook hy-mode-hook)
+;;    (python-outlines-font-lock-alist python-mode-hook)))
 
 (provide 'look-and-feel)

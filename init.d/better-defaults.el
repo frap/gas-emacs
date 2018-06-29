@@ -20,7 +20,7 @@
 
 ;; Auto refresh buffers
 (global-auto-revert-mode 1)
-(diminish 'auto-revert-mode)
+(delight 'auto-revert-mode)
 
 ;; Also auto refresh dired, but be quiet about it
 (setq global-auto-revert-non-file-buffers t)
@@ -76,7 +76,7 @@
 
 ;; Easily navigate sillycased words
 (global-subword-mode 1)
-(diminish 'subword-mode)
+(delight 'subword-mode)
 
 ;; Don't break lines for me, please
 ;; (setq-default truncate-lines t)

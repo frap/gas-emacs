@@ -1,22 +1,27 @@
+(require 'package)
 (setq package-archives
       '(
         ("gnu"          . "https://elpa.gnu.org/packages/")
         ("melpa"        . "https://melpa.org/packages/")
         ("melpa-stable" . "https://stable.melpa.org/packages/")
         ("org"          . "http://orgmode.org/elpa/"))) ;; no https :(
-
-
-;; (require 'package-x)
-;; (setq package-archive-upload-base "/home/arne/LambdaIsland/elpa")
+;;(package-initialize)
 
 (setq package-user-dir
       (expand-file-name (concat "elpa-" (substring emacs-version 0 (string-match "\\." emacs-version 3)))
 			user-emacs-directory))
 
-(package-initialize)
 (unless (file-exists-p (expand-file-name "archives/melpa" package-user-dir)) (package-refresh-contents))
 
-(package-install 'use-package)
+(unless (package-installed-p 'use-package)
+        (package-refresh-contents)
+        (package-install 'use-package))
+
+(require 'use-package)
+
+(if (equal "atearoot" user-login-name)
+    (setq user-mail-address "agasson@ateasystems.com")
+    (setq user-mail-address "agasson@red-elvis.net"))
 
 ;(when (memq window-system '(mac ns x))
 ;  (exec-path-from-shell-initialize))
@@ -49,8 +54,9 @@
 (require 'setup-programming)
 (require 'setup-elisp)
 ;(require 'setup-common-lisp)
+
 (require 'setup-clojure)
-;(require 'init-clojure)
+
 (require 'setup-javascript)
 (require 'setup-code-editing)
 (require 'setup-html)

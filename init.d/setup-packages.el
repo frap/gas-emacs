@@ -35,7 +35,7 @@
 ;; All projectile mappings are under C-c p
 (use-package projectile
   :ensure t
-  :diminish projectile-mode
+  :delight projectile-mode
   :config
   (projectile-global-mode))
 
@@ -47,7 +47,7 @@
 ;;   (use-package helm-projectile :ensure t))
 
 (use-package helm-projectile :ensure t
-  :diminish helm-mode)
+  :delight helm-mode)
 
 (use-package ido :ensure t
   :config
@@ -101,7 +101,7 @@
 (use-package which-key
   :ensure t
   :defer 10
-  :diminish which-key-mode
+  :delight which-key-mode
   :config
 
   ;; Replacements for how KEY is replaced when which-key displays

@@ -30,7 +30,7 @@
 
 (use-package highlight-parentheses
   :ensure t
-  :diminish highlight-parentheses-mode
+  :delight highlight-parentheses-mode
   :config
   (add-hook 'emacs-lisp-mode-hook
             (lambda()
