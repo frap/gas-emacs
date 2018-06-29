@@ -170,7 +170,10 @@
 
 
 (setq  org-agenda-files     (quote ("~/Dropbox/GTD/atea.org"
-                                    "~/Dropbox/GTD/refile.org")))
+                                    "~/Dropbox/GTD/refile.org"
+                                    "~/Dropbox/GTD/someday.org"
+                                    "~/Dropbox/GTD/tickler.org"
+)))
 
 
 (defvar org-default-notes-file "~/Dropbox/GTD/@SUMMARY.org")
