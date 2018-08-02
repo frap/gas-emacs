@@ -103,7 +103,7 @@
   (dolist (m (list 'emacs-lisp-mode-hook 'lisp-interaction-mode-hook 'eval-expression-minibuffer-setup-hook 'ielm-mode-hook))
     (add-hook m 'enable-paredit-mode))
   :bind ( ("M-^" . paredit-delete-indentation)
-          ("C-^" . paredit-remove-newlines
+          ("C-^" . paredit-remove-newlines)
 ;         ("C-c d" . paredit-forward-down)
 ;         ("C-M-f" . clojure-forward-logical-sexp)
 ;         ("C-M-b" . clojure-backward-logical-sexp)
