@@ -69,4 +69,17 @@
   ;;(add-hook 'prog-mode-hook (lambda () (focus-mode 1)))
   )
 
+(use-package paredit
+  :ensure t
+  :delight " {}"
+  :init
+  (dolist (m (list 'emacs-lisp-mode-hook 'lisp-interaction-mode-hook 'eval-expression-minibuffer-setup-hook 'ielm-mode-hook))
+    (add-hook m 'enable-paredit-mode))
+  :bind (("C-c d" . paredit-forward-down)
+         ("C-M-f" . clojure-forward-logical-sexp)
+         ("C-M-b" . clojure-backward-logical-sexp)
+         ("C-M-{" . paredit-wrap-curly)
+         ("C-M-(" . paredit-wrap-round)
+         ("C-M-w" . sp-copy-sexp))
+)
 (provide 'setup-programming)
