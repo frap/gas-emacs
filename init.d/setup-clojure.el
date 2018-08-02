@@ -40,7 +40,7 @@
   (add-hook 'clojure-mode-hook #'paredit-mode)
   (setq cider-repl-use-pretty-printing t)
   (setq cider-repl-display-help-banner nil)
-  (setq cider-cljs-lein-repl "(do (use 'figwheel-sidecar.repl-api) (start-figwheel!) (cljs-repl))")
+;;  (setq cider-cljs-lein-repl "(do (use 'figwheel-sidecar.repl-api) (start-figwheel!) (cljs-repl))")
 
   :bind  ("C-c r" . cider-repl-reset)
          ("C-c ." . cider-reset-test-run-tests)
@@ -157,24 +157,6 @@
 (sp-local-pair 'clojure-mode "#(" ")")
 (sp-local-pair 'clojure-mode "#{" "}")
 
-(setq cider-cljs-lein-repl
-      "(cond
-  (resolve 'user/run) ;; Chestnut projects
-  (eval '(do (user/run)
-             (user/browser-repl)))
-  (try
-    (require 'figwheel-sidecar.repl-api)
-    (resolve 'figwheel-sidecar.repl-api/start-figwheel!)
-    (catch Throwable _))
-  (eval '(do (figwheel-sidecar.repl-api/start-figwheel!)
-             (figwheel-sidecar.repl-api/cljs-repl)))
-  (try
-    (require 'cemerick.piggieback)
-    (resolve 'cemerick.piggieback/cljs-repl)
-    (catch Throwable _))
-  (eval '(cemerick.piggieback/cljs-repl (cljs.repl.rhino/repl-env)))
-  :else
-  (throw (ex-info \"Failed to initialize CLJS repl. Add com.cemerick/piggieback and optionally figwheel-sidecar to your project.\" {})))")
 
 (defun cider-quit-all ()
   (interactive)
@@ -236,29 +218,5 @@ be reused."
         exact-buff)
     (or (cider--select-zombie-buffer repl-buffers) 'new)))
 
-;; (defun cljr--add-test-declarations ()
-;;   (save-excursion
-;;     (let* ((ns (clojure-find-ns))
-;;            (source-ns (cljr--find-source-ns-of-test-ns ns (buffer-file-name))))
-;;       (cljr--insert-in-ns ":require")
-;;       (when source-ns
-;;         (cond ((cljr--cljs-file-p)
-;;                (insert "[" source-ns " :refer []]"))
-;;               ((cljr--cljc-file-p)
-;;                (insert "[" source-ns " :refer []]"))
-;;               (t
-;;                (insert "[" source-ns " :refer :all]"))))
-;;       (cljr--insert-in-ns ":require")
-;;       (insert (cond
-;;                ((cljr--project-depends-on-p "midje")
-;;                 cljr-midje-test-declaration)
-;;                ((cljr--project-depends-on-p "expectations")
-;;                 cljr-expectations-test-declaration)
-;;                ((cljr--cljs-file-p)
-;;                 cljr-cljs-clojure-test-declaration)
-;;                ((cljr--cljc-file-p)
-;;                 cljr-cljc-clojure-test-declaration)
-;;                (t cljr-clojure-test-declaration))))
-;;     (indent-region (point-min) (point-max))))
 
 (provide 'setup-clojure)
