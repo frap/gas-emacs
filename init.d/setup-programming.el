@@ -69,17 +69,54 @@
   ;;(add-hook 'prog-mode-hook (lambda () (focus-mode 1)))
   )
 
+
+(defun paredit-delete-indentation (&optional arg)
+  "Handle joining lines that end in a comment."
+  (interactive "*P")
+  (let (comt)
+    (save-excursion
+      (move-beginning-of-line (if arg 1 0))
+      (when (skip-syntax-forward "^<" (point-at-eol))
+        (setq comt (delete-and-extract-region (point) (point-at-eol)))))
+    (delete-indentation arg)
+    (when comt
+      (save-excursion
+        (move-end-of-line 1)
+        (insert " ")
+        (insert comt)))))
+
+
+(defun paredit-remove-newlines ()
+  "Removes extras whitespace and newlines from the current point
+    to the next parenthesis."
+  (interactive)
+  (let ((up-to (point))
+        (from (re-search-forward "[])}]")))
+    (backward-char)
+    (while (> (point) up-to)
+      (paredit-delete-indentation))))
+
 (use-package paredit
   :ensure t
   :delight " {}"
   :init
   (dolist (m (list 'emacs-lisp-mode-hook 'lisp-interaction-mode-hook 'eval-expression-minibuffer-setup-hook 'ielm-mode-hook))
     (add-hook m 'enable-paredit-mode))
-  :bind (("C-c d" . paredit-forward-down)
-         ("C-M-f" . clojure-forward-logical-sexp)
-         ("C-M-b" . clojure-backward-logical-sexp)
-         ("C-M-{" . paredit-wrap-curly)
-         ("C-M-(" . paredit-wrap-round)
-         ("C-M-w" . sp-copy-sexp))
-)
+  :bind ( ("M-^" . paredit-delete-indentation)
+          ("C-^" . paredit-remove-newlines
+;         ("C-c d" . paredit-forward-down)
+;         ("C-M-f" . clojure-forward-logical-sexp)
+;         ("C-M-b" . clojure-backward-logical-sexp)
+;         ("C-M-{" . paredit-wrap-curly)
+ ;        ("C-M-(" . paredit-wrap-round)
+ ;        ("C-M-w" . sp-copy-sexp)
+           )
+  )
+
+ ;; Useful key sequences for positioning cursor on particular s-expressions:
+
+ ;;  - C-M- a d :: Move to beginning of function and inside the
+ ;;      declaration. Good start to just about any other positioning.
+ ;; - C-M- d f d :: At beginning of function, moves to first s-expression.
+
 (provide 'setup-programming)
