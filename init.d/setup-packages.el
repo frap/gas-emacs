@@ -23,6 +23,7 @@
 ;; Expand snippets
 (use-package yasnippet
   :ensure t
+  :delight
   :config
   (yas-reload-all))
 
@@ -200,5 +201,12 @@
 ;(use-package so-long
 ;  :config
 ;  (so-long-enable))
+
+(delight '((abbrev-mode " Abv" abbrev)
+            (smart-tab-mode " \\t" smart-tab)
+            (eldoc-mode nil "eldoc")
+            (rainbow-mode)
+            (overwrite-mode " Ov" t)
+            (emacs-lisp-mode "Elisp" :major)))
 
 (provide 'setup-packages)

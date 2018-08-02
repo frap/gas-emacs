@@ -31,7 +31,7 @@
 (use-package cider
   :ensure t
   :pin melpa-stable
-
+  :diminish "🍺"
   :config
   (add-hook 'cider-repl-mode-hook #'company-mode)
   (add-hook 'cider-mode-hook #'company-mode)
