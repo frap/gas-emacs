@@ -1,15 +1,12 @@
-(use-package clojurescript-mode
-  :delight "☯cljs")
-
-(use-package clojurec-mode
-  :delight "☯cljc"
-  :config
-  (add-to-list 'auto-mode-alist '("\\.cljc$" . clojurec-mode))
-)
 
 (use-package clojure-mode
   :ensure t
   :delight "☯clj"
+  :mode (("\\.edn$"  . clojurec-mode)
+         ("\\.boot$" . clojure-mode)
+         ("\\.cljs$" . clojurescript-mode)
+         ("\\.cljc$" . clojurec-mode)
+         )
   :init
   (defconst clojure--prettify-symbols-alist
     '(("fn"   . ?λ)
