@@ -136,9 +136,9 @@
   (org-clock-in '(4)))
 
 (global-set-key (kbd "<f5>") #'eos/org-clock-in)
-(global-set-key (kbd "C-c I") #'eos/org-clock-in)
-(global-set-key (kbd "<f6>") #'org-clock-out)
-(global-set-key (kbd "C-c O") #'org-clock-out)
+(global-set-key (kbd "C-c <f5>") #'eos/org-clock-in)
+;(global-set-key (kbd "<f6>") #'org-clock-out)
+;(global-set-key (kbd "C-c O") #'org-clock-out)
 
 (setq  gas/keep-clock-running nil)
 
