@@ -26,10 +26,14 @@
 ;(when (memq window-system '(mac ns x))
 ;  (exec-path-from-shell-initialize))
 
-(use-package diminish
-  :ensure t)
+
 (use-package delight
-  :ensure t)
+  :ensure t
+  :config
+  (progn
+  (eval-after-load "Clojurec" '(delight 'clojurec-mode  "☯cljc"))
+  (eval-after-load "Clojurescript" '(delight 'clojurescript-mode  "☯cljs"))
+))
 
 (use-package ess-site
   :load-path "init.d/"
