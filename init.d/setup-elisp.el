@@ -30,7 +30,7 @@
     :config
     (add-hook 'clojure-mode-hook 'rainbow-delimiters-mode)
     (add-hook 'emacs-lisp-mode-hook 'rainbow-delimiters-mode)
-    :delight ("rainbow-mode" ""))
+    :delight ("rainbow-mode" "🌈"))
 
 (global-highlight-parentheses-mode)
 
