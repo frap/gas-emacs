@@ -90,7 +90,7 @@
 
 (global-set-key (kbd "<f5>") 'org-clock-goto)
 (global-set-key (kbd "C-<f5>") 'org-clock-in)
-(global-set-key (kbd "<f6> i") 'gas/punch-in)
-(global-set-key (kbd "<f6> o") 'gas/punch-out)
+(global-set-key (kbd "<f6>") 'gas/punch-in)
+(global-set-key (kbd "C-<f6>") 'gas/punch-out)
 
 (provide 'key-bindings)
