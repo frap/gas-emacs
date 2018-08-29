@@ -26,7 +26,7 @@
                 (todo category-up effort-up)
                 (tags category-up effort-up)
                 (search category-up)))
-        org-agenda-span 10          ;; 10 day overview
+ ;;       org-agenda-span 10          ;; 10 day overview
         org-agenda-tags-column -102
         org-refile-targets (quote ((nil :maxlevel . 9)
                                    (org-agenda-files :maxlevel . 9)))
@@ -291,12 +291,6 @@
 (setq org-agenda-clockreport-parameter-plist
       (quote (:link t :maxlevel 5 :fileskip0 t :compact t :narrow 80)))
 
-;; Set the times to display in the time grid
-(setq org-agenda-time-grid
-  '((daily today require-timed)
-    "----------------"
-    (800 1200 1600 2000)))
-
 ;; Agenda log mode items to display (closed and state changes by default)
 (setq org-agenda-log-mode-items (quote (closed state)))
 
@@ -330,6 +324,9 @@
   :bind
   (:map org-agenda-mode-map
         (("I" . org-pomodoro)))
+  :config
+  (setq org-pomodoro-audio-player "afplay")
+  ;;       (setq org-pomodoro-ticking-sound-p t)
   :custom
   (org-pomodoro-format "%s")
   )
@@ -385,6 +382,17 @@
                ))
                 )
 
+(setq org-tag-alist (quote (("@errand" . ?e)
+                               ("@bureau" . ?o)
+                               ("@maison" . ?h)
+                               ("@la_vie" . ?l)
+                               (:newline)
+                               ("ATTENDRE" . ?w)
+                               ("SUSPENDUE" . ?H)
+                               ("ANNULÉ" . ?c))))
+
+(setq org-fast-tag-selection-single-key nil)
+
 (setq org-agenda-custom-commands (quote
                                   (
                                    ("N" "Notes" tags "NOTE"
@@ -395,7 +403,9 @@
                                      (org-agenda-sorting-strategy
                                       '(todo-state-down priority-down category-keep))))
                                    (" " "Ordre du Jour"
-                                    ((agenda "" nil)
+                                    ((agenda ""
+                                              ((org-agenda-span 'day)
+                                               (org-deadline-warning-days 365)))
                                      (alltodo ""
                                               ((org-agenda-overriding-header "Tâches à la Représenter")
                                                (org-agenda-files '("~/Dropbox/GTD/inbox.org"))
@@ -416,11 +426,21 @@
                                      (tags-todo "-ANNULÉ/!SUSPENDUE|SOUTE"
                                                 ((org-agenda-overriding-header "Attente ou Reporté Tâches")
                                                  ))
-                                     (tags-todo "-ANNULÉ/!-PROCHAIN-SOUTE-SUSPENDUE-VALUE-GOAL"
+                                     (tags-todo "-ANNULÉ/!-PROCHAIN-SOUTE-ATTENDRE-VALUE-GOAL"
                                                 ((org-agenda-overriding-header "Tâches Disponibles")
                                                  (org-agenda-sorting-strategy '(effort-up priority-down))))
                                      ))))
       )
+
+(defun gas/org-inbox-capture ()
+  (interactive)
+  "Capture a task in agenda mode."
+  (org-capture nil "t"))
+
+(define-key org-agenda-mode-map "i" 'org-agenda-clock-in)
+(define-key org-agenda-mode-map "r" 'gas/org-process-inbox)
+(define-key org-agenda-mode-map "R" 'org-agenda-refile)
+(define-key org-agenda-mode-map "c" 'gas/org-inbox-capture)
 
 (setq package-check-signature nil)
 (use-package org-gcal
