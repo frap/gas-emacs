@@ -294,6 +294,23 @@
              (marker-buffer org-clock-default-task)
              (not org-clock-resolving-clocks-due-to-idleness))
     (gas/clock-in-parent-task)))
+
+(defun gas/is-project-p ()
+  "Any task with a todo keyword subtask"
+  (save-restriction
+    (widen)
+    (let ((has-subtask)
+          (subtree-end (save-excursion (org-end-of-subtree t)))
+          (is-a-task (member (nth 2 (org-heading-components)) org-todo-keywords-1)))
+      (save-excursion
+        (forward-line 1)
+        (while (and (not has-subtask)
+                    (< (point) subtree-end)
+                    (re-search-forward "^\*+ " subtree-end t))
+          (when (member (org-get-todo-state) org-todo-keywords-1)
+            (setq has-subtask t))))
+      (and is-a-task has-subtask))))
+
 ;; use discrete minute intervals
 (setq org-time-stamp-rounding-minutes (quote (1 1)))
 ;; Sometimes I change tasks I'm clocking quickly - this removes clocked tasks with 0:00 duration
@@ -414,53 +431,53 @@
 
 (setq org-fast-tag-selection-single-key nil)
 
-(setq org-agenda-custom-commands
-      (quote
-       (
-        ("N" "Notes" tags "NOTE"
-         ((org-agenda-overriding-header "Notes")
-          (org-tags-match-list-sublevels t)))
-        ("h" "Habits" tags-todo "STYLE=\"habit\""
-         ((org-agenda-overriding-header "Habits")
-          (org-agenda-sorting-strategy
-           '(todo-state-down priority-down category-keep))))
-        (" " "Ordre du Jour"
-         ((agenda "" nil)
-          (alltodo ""
-                   ((org-agenda-overriding-header "Tâches à la Représenter")
-                    (org-agenda-files '("~/Dropbox/GTD/inbox.org"))
-                    ))
-          (tags-todo "-SUSPENDUE-ANNULÉ/!PROCHAIN"
-                     ((org-agenda-overriding-header "Tâche Prochain")
-                      (org-tags-match-list-sublevels nil)))
-          (tags-todo "-SUSPENDUE-ANNULÉ/!TODO"
-                     ((org-agenda-overriding-header "Tâche de Travail")
-                      (org-agenda-sorting-strategy
-                       '(todo-state-down priority-down))))
-          (tags "REFILE"
-                ((org-agenda-overriding-header "Tâche de Refile")
-                 (org-tags-match-list-sublevels nil)))
-          (tags-todo "-ANNULÉ/!-SOUTE-SUSPENDUE-GOAL"
-                     ((org-agenda-overriding-header "Projets Bloqués")
-                      ))
-          (tags-todo "-ANNULÉ/!SUSPENDUE|SOUTE"
-                     ((org-agenda-overriding-header "Attente ou Reporté Tâches")
-                      ))
-          (tags-todo "-ANNULÉ/!-PROCHAIN-SOUTE-ATTENDRE-VALUE-GOAL"
-                     ((org-agenda-overriding-header "Tâches Disponibles")
-                      (org-agenda-sorting-strategy '(effort-up priority-down))))
-          ))))
-      )
+(setq org-agenda-block-separator nil)
+(setq org-agenda-start-with-log-mode t)
+
+(setq   org-agenda-custom-commands
+        (quote (
+                ("N" "Notes" tags "NOTE"
+                 ((org-agenda-overriding-header "Notes")
+                  (org-tags-match-list-sublevels t)))
+                ("h" "Habits" tags-todo "STYLE=\"habit\""
+                 ((org-agenda-overriding-header "Habits")
+                  (org-agenda-sorting-strategy
+                   '(todo-state-down priority-down category-keep))))
+                (" " "Agenda"
+                 ((agenda ""
+                          ((org-agenda-span 'day)
+                           (org-deadline-warning-days 365))
+                          )
+                  (tags "-ANNULÉ/!PROCHAIN"
+                        ((org-agenda-overriding-header "Tâches Courante")
+                         (org-tags-match-list-sublevels nil)
+                         (org-agenda-sorting-strategy
+                               '(todo-state-down priority-down))))
+                  (tags-todo "-ANNULÉ/!TODO"
+                             ((org-agenda-overriding-header "Tâches de Travail")
+                              (org-agenda-sorting-strategy
+                               '(todo-state-down priority-down))))
+                  (tags-todo "-ANNULÉ/!-SOUTE-ATTENDRE-GOAL"
+                             ((org-agenda-overriding-header "Projets Bloqués")
+                              (org-agenda-sorting-strategy '(effort-up priority-down))
+                              ))
+                  (tags-todo "-ANNULÉ/!ATTENDRE|SUSPENDUE"
+                             ((org-agenda-overriding-header "Attente ou Reporté Tâches")
+                              ))
+                  ))))
+        )
+
+(setq org-columns-default-format "%40ITEM(Task) %Effort(EE){:} %CLOCKSUM(Time Spent) %SCHEDULED(Scheduled) %DEADLINE(Deadline)")
 
 (defun gas/org-inbox-capture ()
   (interactive)
   "Capture a task in agenda mode."
   (org-capture nil "t"))
 
-(define-key org-agenda-mode-map "i" 'org-agenda-clock-in)
-(define-key org-agenda-mode-map "r" 'gas/org-process-inbox)
+(define-key org-agenda-mode-map "i" 'gas/punch-in)  ;; was 'org-agenda-clock-in
+;;(define-key org-agenda-mode-map "r" 'gas/org-process-inbox)
 (define-key org-agenda-mode-map "R" 'org-agenda-refile)
-(define-key org-agenda-mode-map "c" 'gas/org-inbox-capture)
+;;(define-key org-agenda-mode-map "c" 'gas/org-inbox-capture)
 
 (setq package-check-signature nil)
 (use-package org-gcal
