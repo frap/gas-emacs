@@ -434,6 +434,8 @@
 (setq org-agenda-block-separator nil)
 (setq org-agenda-start-with-log-mode t)
 
+ (delight 'org-agenda-mode "øα")
+
 (setq   org-agenda-custom-commands
         (quote (
                 ("N" "Notes" tags "NOTE"
@@ -477,10 +479,11 @@
 (define-key org-agenda-mode-map "i" 'gas/punch-in)  ;; was 'org-agenda-clock-in
 ;;(define-key org-agenda-mode-map "r" 'gas/org-process-inbox)
 (define-key org-agenda-mode-map "R" 'org-agenda-refile)
-;;(define-key org-agenda-mode-map "c" 'gas/org-inbox-capture)
+(define-key org-agenda-mode-map "c" 'gas/org-inbox-capture)
 
 (setq package-check-signature nil)
 (use-package org-gcal
+  :ensure t
   ;;   :after '(auth-source-pass password-store)
   :config
   (setq org-gcal-client-id "887865341451-orrpnv3cu0fnh8hdtge77sv6csqilqtu.apps.googleusercontent.com"
