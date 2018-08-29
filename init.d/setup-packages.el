@@ -23,13 +23,14 @@
 ;; Expand snippets
 (use-package yasnippet
   :ensure t
-  :delight
+  :delight "γ"
   :config
   (yas-reload-all))
 
 ;; Intelligent sexp editing. M-x customize-group smartparens
 (use-package smartparens
   :ensure t
+;;  :delight: "[]"
   :config (require 'smartparens-config))
 
 ;; Project-aware operations
@@ -93,7 +94,7 @@
   (setq undo-tree-mode-lighter "")
   (global-undo-tree-mode)
   (defalias 'redo 'undo-tree-redo)
-  :bind (("C-z" . undo)     ; Zap to character isn't helpful
+  :bind (("C-z"   . undo)     ; Zap to character isn't helpful
          ("C-S-z" . redo)))
 
 ;; Duplicate line or region
@@ -163,7 +164,7 @@
   :bind (("H-g" . magit-status)))
 
 
-(use-package string-edit :ensure t)
+;;(use-package string-edit :ensure t)
 
 ;; Highlight Symbol
 ;; (use-package highlight-symbol
@@ -202,11 +203,11 @@
 ;  :config
 ;  (so-long-enable))
 
-(delight '((abbrev-mode " Abv" abbrev)
+(delight  '((abbrev-mode " Abv" abbrev)
             (smart-tab-mode " \\t" smart-tab)
             (eldoc-mode nil "eldoc")
             (rainbow-mode)
             (overwrite-mode " Ov" t)
-            (emacs-lisp-mode "Elisp" :major)))
+            ))
 
 (provide 'setup-packages)

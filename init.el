@@ -31,8 +31,8 @@
   :ensure t
   :config
   (progn
-  (eval-after-load "Clojurec" '(delight 'clojurec-mode  "☯cljc"))
-  (eval-after-load "Clojurescript" '(delight 'clojurescript-mode  "☯cljs"))
+  (eval-after-load "ClojureC" '(delight 'clojurec-mode  "☯cljc"))
+  (eval-after-load "ClojureScript" '(delight 'clojurescript-mode  "☯cljs"))
 ))
 
 (use-package ess-site

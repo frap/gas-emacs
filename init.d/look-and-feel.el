@@ -1,12 +1,12 @@
 ;;(set-default-font "InputSerifNarrow-12")
 ;;(when (member "Input" (font-family-list)) (set-frame-font "InputSerifNarrow-12" t t))
-;(when (member "Menlo" (font-family-list)) (set-frame-font "Menlo-14" t t))
+                                        ;(when (member "Menlo" (font-family-list)) (set-frame-font "Menlo-14" t t))
 (when (window-system)
-  (set-frame-font "Hack-13" t t)) ;; was "Fira Code"
-;(when (member "Inconsolata" (font-family-list)) (set-frame-font "Inconsolata-17" t t))
+  (set-frame-font "Hack-13" t t));; was "Fira Code"
+                                        ;(when (member "Inconsolata" (font-family-list)) (set-frame-font "Inconsolata-17" t t))
 ;;(set-frame-font "Anonymous Pro-14")
 
-;(set-frame-parameter nil 'left-fringe 18)
+                                        ;(set-frame-parameter nil 'left-fringe 18)
 
 ;; Emoji! ð
 ;;(set-fontset-font t 'unicode "Symbola" nil 'prepend)

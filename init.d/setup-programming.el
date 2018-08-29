@@ -100,7 +100,7 @@
   :ensure t
   :delight " {}"
   :init
-  (dolist (m (list 'emacs-lisp-mode-hook 'lisp-interaction-mode-hook 'eval-expression-minibuffer-setup-hook 'ielm-mode-hook))
+  (dolist (m (list 'emacs-lisp-mode-hook 'lisp-interaction-mode-hook 'eval-expression-minibuffer-setup-hook 'ielm-mode-hook 'clojurescript-mode))
     (add-hook m 'enable-paredit-mode))
   :bind ( ("M-^" . paredit-delete-indentation)
           ("C-^" . paredit-remove-newlines)

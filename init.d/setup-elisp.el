@@ -5,7 +5,7 @@
 
 
 (use-package elisp-mode
-  :delight (emacs-lisp-mode "εl " :major)
+  :delight (emacs-lisp-mode "ξλ " :major)
   :bind (("C-C C-r" . eval-region))
   :config
   (add-hook 'emacs-lisp-mode-hook #'eldoc-mode)
@@ -17,7 +17,7 @@
 
 (use-package highlight-parentheses
   :ensure t
-  :delight highlight-parentheses-mode
+  :delight "🔦";highlight-parentheses-mode
   :config
   (add-hook 'emacs-lisp-mode-hook
             (lambda()

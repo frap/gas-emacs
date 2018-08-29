@@ -24,6 +24,7 @@
 
 (use-package emmet-mode
   :ensure t
+  :delight "🎀"
   :config
   (add-hook 'clojure-mode-hook 'emmet-mode))
 

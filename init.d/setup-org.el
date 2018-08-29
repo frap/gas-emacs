@@ -1,15 +1,10 @@
-(use-package org-pomodoro
-  :ensure t
-  :commands (org-pomodoro)
-  :config
-  )
 
 ;;(delight 'org-agenda-mode "📅")
 
 (use-package org
   :ensure org-plus-contrib        ; But it comes with Emacs now!?
   :mode (("\\.org$" . org-mode))
-  :delight org-mode "📝"
+  :delight org-mode "✒"              ; "📝"
   :init
   (setq org-directory "~/Dropbox/GTD"
         org-use-speed-commands t
@@ -51,7 +46,12 @@
   :bind (("C-c l" . org-store-link)
          ("C-c c" . org-capture)
          ("C-M-|" . indent-rigidly)
-         ("C-c a" . org-agenda))
+         ("C-c a" . org-agenda)
+         ("C-M-|" . indent-rigidly)
+         :map org-mode-map
+         ("M-n" . outline-next-visible-heading)
+         ("M-p" . outline-previous-visible-)
+         )
   :config
   (font-lock-add-keywords            ; A bit silly but my headers are now
    'org-mode `(("^\\*+ \\(TODO\\) "  ; shorter, and that is nice canceled
@@ -89,7 +89,59 @@
                                                 (if (org-in-src-block-p)
                                                     (org-return)
                                                   (org-return-indent))))
-  )
+)
+ ;;use some of the packages from org extras, especially
+
+(use-package org-drill
+   :ensure org-plus-contrib)
+
+(use-package org-mime
+  :ensure t)
+
+;; couple of short-cut keys to make it easier to edit text.
+(defun org-text-bold () "Wraps the region with asterisks."
+       (interactive)
+       (surround-text "*"))
+(defun org-text-italics () "Wraps the region with slashes."
+       (interactive)
+       (surround-text "/"))
+(defun org-text-code () "Wraps the region with equal signs."
+       (interactive)
+       (surround-text "="))
+
+(use-package org
+  :config
+  (bind-keys :map org-mode-map
+             ("A-b" . (surround-text-with "+"))
+             ("s-b" . (surround-text-with "*"))
+             ("A-i" . (surround-text-with "/"))
+             ("s-i" . (surround-text-with "/"))
+             ("A-=" . (surround-text-with "="))
+             ("s-=" . (surround-text-with "="))
+             ("A-`" . (surround-text-with "~"))
+             ("s-`" . (surround-text-with "~"))
+
+             ("C-s-f" . forward-sentence)
+             ("C-s-b" . backward-sentence)))
+
+(use-package org-bullets
+  :ensure t
+  :init (add-hook 'org-mode-hook 'org-bullets-mode))
+
+;; quickly making the initial asterisks for listing items and whatnot, appear as Unicode bullets (without actually affecting the text file or the behavior).
+    (use-package org
+       :init
+       (font-lock-add-keywords 'org-mode
+        '(("^ +\\([-*]\\) "
+               (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•")))))))
+
+(setq org-agenda-files (quote ("~/Dropbox/GTD/atea.org"
+                               "~/Dropbox/GTD/inbox.org"
+                               "~/Dropbox/GTD/someday.org"
+                                "~/Dropbox/GTD/prochain.org"
+                                "~/Dropbox/GTD/calendars/atea-cal.org"
+                                "~/Dropbox/GTD/calendars/changecontrol-cal.org"
+                                )))
 
 ;; Auto-update tags whenever the state is changed
 (setq org-todo-state-tags-triggers
@@ -263,13 +315,8 @@
               :max-gap 0
               :gap-ok-around ("4:00"))))
 
-;; for html exports
-(use-package org-drill
-      :ensure org-plus-contrib)
 
-(use-package org-bullets
-  :ensure t
-  :init (add-hook 'org-mode-hook 'org-bullets-mode))
+
 
 (setq org-hide-emphasis-markers t)
 
@@ -278,11 +325,21 @@
                           '(("^ +\\([-*]\\) "
                              (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•"))))))
 
+(use-package org-pomodoro
+  :after org
+  :bind
+  (:map org-agenda-mode-map
+        (("I" . org-pomodoro)))
+  :custom
+  (org-pomodoro-format "%s")
+  )
+
 
 (use-package org-journal
   :ensure t
-  :init
-  (setq org-journal-dir "~/Dropbox/GTD/")
+  :custom
+  (setq org-journal-dir "~/Dropbox/journal/")
+  :config
   (setq org-journal-date-format "#+TITLE: Journal Entry- %e %b %Y (%A)")
   (setq org-journal-time-format ""))
 
@@ -298,14 +355,6 @@
 
 (global-set-key (kbd "C-c f j") 'journal-file-today)
 
-
-(setq  org-agenda-files     (quote ("~/Dropbox/GTD/atea.org"
-                                    "~/Dropbox/GTD/refile.org"
-                                    "~/Dropbox/GTD/someday.org"
-                                    "~/Dropbox/GTD/tickler.org"
-)))
-
-
 (defvar org-default-notes-file "~/Dropbox/GTD/@SUMMARY.org")
 (defvar org-default-tasks-file "~/Dropbox/GTD/atea.org")
 
@@ -318,20 +367,20 @@
 (setq org-deadline-warning-days 10)
 
 (setq org-capture-templates
-       (quote (("t" "todo" entry (file "~/Dropbox/GTD/refile.org")
+       (quote (("t" "todo" entry (file "~/Dropbox/GTD/inbox.org")
                 "* TODO %?\n%U\n%a\n" :clock-in t :clock-resume t)
-               ("r" "respond" entry (file "~/Dropbox/GTD/refile.org")
+               ("r" "respond" entry (file "~/Dropbox/GTD/inbox.org")
                 "* PROCHAIN Respond to %:from on %:subject\nSCHEDULED: %t\n%U\n%a\n" :clock-in t :clock-resume t :immediate-finish t)
-               ("n" "Les notes" entry (file "~/Dropbox/GTD/refile.org")
+               ("n" "Les notes" entry (file "~/Dropbox/GTD/inbox.org")
                 "* %? :NOTE:\n%U\n%a\n" :clock-in t :clock-resume t)
                ("j" "un note quotidien"     entry
                 (file (get-journal-file-today))
                 "* %?\n\n  %i\n\n  From: %a" :empty-lines 1 :clock-in t :clock-resume t)
-               ("m" "Meeting" entry (file "~/Dropbox/GTD/refile.org")
+               ("m" "Meeting" entry (file "~/Dropbox/GTD/atea-cal.org")
                 "* RÉUNION with %? :RÉUNION:\n%U" :clock-in t :clock-resume t)
-               ("p" "Phone call" entry (file "~/Dropbox/GTD/refile.org")
+               ("p" "Phone call" entry (file "~/Dropbox/GTD/inbox.org")
                 "* TÉLÉPHONE %? :TÉLÉPHONE:\n%U" :clock-in t :clock-resume t)
-               ("h" "Habit🙈" entry (file "~/Dropbox/GTD/refile.org")
+               ("h" "Habit🙈" entry (file "~/Dropbox/GTD/inbox.org")
                 "* TODO %?\n%U\n%a\nSCHEDULED: %(format-time-string \"%<<%Y-%m-%d %a .+1d/3d>>\")\n:PROPERTIES:\n:STYLE: habit\n:REPEAT_TO_STATE: PROCHAIN\n:END:\n")
                ))
                 )
@@ -345,11 +394,15 @@
                                     ((org-agenda-overriding-header "Habits")
                                      (org-agenda-sorting-strategy
                                       '(todo-state-down priority-down category-keep))))
-                                   (" " "Agenda"
+                                   (" " "Ordre du Jour"
                                     ((agenda "" nil)
+                                     (alltodo ""
+                                              ((org-agenda-overriding-header "Tâches à la Représenter")
+                                               (org-agenda-files '("~/Dropbox/GTD/inbox.org"))
+                                               ))
                                      (tags-todo "-SUSPENDUE-ANNULÉ/!PROCHAIN"
-                                           ((org-agenda-overriding-header "Tâche Prochain")
-                                            (org-tags-match-list-sublevels nil)))
+                                                ((org-agenda-overriding-header "Tâche Prochain")
+                                                 (org-tags-match-list-sublevels nil)))
                                      (tags-todo "-SUSPENDUE-ANNULÉ/!TODO"
                                                 ((org-agenda-overriding-header "Tâche de Travail")
                                                  (org-agenda-sorting-strategy
@@ -357,8 +410,37 @@
                                      (tags "REFILE"
                                            ((org-agenda-overriding-header "Tâche de Refile")
                                             (org-tags-match-list-sublevels nil)))
+                                     (tags-todo "-ANNULÉ/!-SOUTE-SUSPENDUE-GOAL"
+                                                ((org-agenda-overriding-header "Projets Bloqués")
+                                                 ))
+                                     (tags-todo "-ANNULÉ/!SUSPENDUE|SOUTE"
+                                                ((org-agenda-overriding-header "Attente ou Reporté Tâches")
+                                                 ))
+                                     (tags-todo "-ANNULÉ/!-PROCHAIN-SOUTE-SUSPENDUE-VALUE-GOAL"
+                                                ((org-agenda-overriding-header "Tâches Disponibles")
+                                                 (org-agenda-sorting-strategy '(effort-up priority-down))))
                                      ))))
- )
+      )
+
+(setq package-check-signature nil)
+(use-package org-gcal
+  ;;   :after '(auth-source-pass password-store)
+  :config
+  (setq org-gcal-client-id "887865341451-orrpnv3cu0fnh8hdtge77sv6csqilqtu.apps.googleusercontent.com"
+        org-gcal-client-secret "WmOGOCr_aWPJSqmwXHV-29bv"
+        org-gcal-file-alist
+        '(("agasson@ateasystems.com" . "~/Dropbox/GTD/calendars/atea-cal.org")
+          ("ateasystems.com_0ie21uc26j0a41g60b8f99mh1k@group.calendar.google.com" . "~/Dropbox/GTD/calendars/changecontrol-cal.org"))))
+
+(add-hook 'org-agenda-mode-hook (lambda () (org-gcal-sync) ))
+(add-hook 'org-capture-after-finalize-hook (lambda () (org-gcal-sync) ))
+
+;; run on a timer
+(run-at-time (* 5 60) nil
+             (lambda ()
+               (let ((inhibit-message t))
+                 (org-gcal-refresh-token)
+                 (org-gcal-fetch))))
 
 
 (use-package ox-html

@@ -1,7 +1,7 @@
 
 (use-package clojure-mode
   :ensure t
-  :delight "☯clj"
+  :delight "☯λlj"
   :mode (("\\.edn$"  . clojurec-mode)
          ("\\.boot$" . clojure-mode)
          ("\\.cljs$" . clojurescript-mode)
@@ -25,6 +25,15 @@
   (add-hook 'clojure-mode-hook 'subword-mode)
   (add-hook 'clojure-mode-hook 'global-prettify-symbols-mode))
 
+(delight '((clojurescript-mode "☯λljs" :major)
+           (clojurec-mode "☯λljc"      :major)))
+;
+(defun figwheel-repl ()
+  (interactive)
+  (inf-clojure "clojure -m figwheel.main"))
+
+
+;(add-hook 'clojure-mode-hook #'inf-clojure-minor-mode)
 
 (use-package aggressive-indent
     :ensure t
@@ -37,7 +46,7 @@
 (use-package cider
   :ensure t
   :pin melpa-stable
-  :diminish "🍺"
+  :delight "🍺"
   :config
   (add-hook 'cider-repl-mode-hook #'company-mode)
   (add-hook 'cider-mode-hook #'company-mode)
@@ -53,6 +62,7 @@
 ;;(  cider-namespace-refresh)
 )
 
+(setq cider-default-cljs-repl 'nashorn)
 
 ;(use-package clj-refactor
 ;  :ensure t
