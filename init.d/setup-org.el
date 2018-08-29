@@ -187,8 +187,8 @@
   (interactive)
   (org-clock-in '(4)))
 
-(global-set-key (kbd "<f5>") #'eos/org-clock-in)
-(global-set-key (kbd "C-c <f5>") #'eos/org-clock-in)
+(global-set-key (kbd "<f5>") #'gas/punch-in)
+(global-set-key (kbd "C-c <f5>") #'gas/punch-out)
 ;(global-set-key (kbd "<f6>") #'org-clock-out)
 ;(global-set-key (kbd "C-c O") #'org-clock-out)
 
@@ -259,6 +259,21 @@
   (save-excursion
     (org-with-point-at org-clock-default-task
       (org-clock-in))))
+
+(defun gas/clock-in-parent-task ()
+  "Move point to the parent (project) task if any and clock in"
+  (let ((parent-task))
+    (save-excursion
+      (save-restriction
+        (widen)
+        (while (and (not parent-task) (org-up-heading-safe))
+          (when (member (nth 2 (org-heading-components)) org-todo-keywords-1)
+            (setq parent-task (point))))
+        (if parent-task
+            (org-with-point-at parent-task
+              (org-clock-in))
+          (when gas/keep-clock-running
+            (gas/clock-in-default-task)))))))
 
 (defvar gas/organisation-task-id "eb155a82-92b2-4f25-a3c6-0304591af2f9")
 
@@ -331,6 +346,7 @@
   (org-pomodoro-format "%s")
   )
 
+(org-journal-update-auto-mode-alist)
 
 (use-package org-journal
   :ensure t
@@ -373,7 +389,7 @@
                ("j" "un note quotidien"     entry
                 (file (get-journal-file-today))
                 "* %?\n\n  %i\n\n  From: %a" :empty-lines 1 :clock-in t :clock-resume t)
-               ("m" "Meeting" entry (file "~/Dropbox/GTD/atea-cal.org")
+               ("m" "Meeting" entry (file "~/Dropbox/GTD/calendars/atea-cal.org")
                 "* RÉUNION with %? :RÉUNION:\n%U" :clock-in t :clock-resume t)
                ("p" "Phone call" entry (file "~/Dropbox/GTD/inbox.org")
                 "* TÉLÉPHONE %? :TÉLÉPHONE:\n%U" :clock-in t :clock-resume t)
