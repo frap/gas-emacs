@@ -98,6 +98,12 @@
 (use-package org-mime
   :ensure t)
 
+(setq org-agenda-time-grid
+      (quote
+       ((daily today remove-match)
+        (0830 1030 1230 1500 1700)
+        "......" "----------------")))
+
 ;; couple of short-cut keys to make it easier to edit text.
 (defun org-text-bold () "Wraps the region with asterisks."
        (interactive)
@@ -346,13 +352,12 @@
   (org-pomodoro-format "%s")
   )
 
-(org-journal-update-auto-mode-alist)
+;;(org-journal-update-auto-mode-alist)
 
 (use-package org-journal
   :ensure t
-  :custom
-  (setq org-journal-dir "~/Dropbox/journal/")
   :config
+  (setq org-journal-dir "~/Dropbox/journal/")
   (setq org-journal-date-format "#+TITLE: Journal Entry- %e %b %Y (%A)")
   (setq org-journal-time-format ""))
 
@@ -366,7 +371,7 @@
   (interactive)
   (find-file (get-journal-file-today)))
 
-(global-set-key (kbd "C-c f j") 'journal-file-today)
+;;(global-set-key (kbd "C-c f j") 'journal-file-today)
 
 (defvar org-default-notes-file "~/Dropbox/GTD/@SUMMARY.org")
 (defvar org-default-tasks-file "~/Dropbox/GTD/atea.org")
@@ -409,43 +414,42 @@
 
 (setq org-fast-tag-selection-single-key nil)
 
-(setq org-agenda-custom-commands (quote
-                                  (
-                                   ("N" "Notes" tags "NOTE"
-                                    ((org-agenda-overriding-header "Notes")
-                                     (org-tags-match-list-sublevels t)))
-                                   ("h" "Habits" tags-todo "STYLE=\"habit\""
-                                    ((org-agenda-overriding-header "Habits")
-                                     (org-agenda-sorting-strategy
-                                      '(todo-state-down priority-down category-keep))))
-                                   (" " "Ordre du Jour"
-                                    ((agenda ""
-                                              ((org-agenda-span 'day)
-                                               (org-deadline-warning-days 365)))
-                                     (alltodo ""
-                                              ((org-agenda-overriding-header "Tâches à la Représenter")
-                                               (org-agenda-files '("~/Dropbox/GTD/inbox.org"))
-                                               ))
-                                     (tags-todo "-SUSPENDUE-ANNULÉ/!PROCHAIN"
-                                                ((org-agenda-overriding-header "Tâche Prochain")
-                                                 (org-tags-match-list-sublevels nil)))
-                                     (tags-todo "-SUSPENDUE-ANNULÉ/!TODO"
-                                                ((org-agenda-overriding-header "Tâche de Travail")
-                                                 (org-agenda-sorting-strategy
-                                                  '(todo-state-down priority-down))))
-                                     (tags "REFILE"
-                                           ((org-agenda-overriding-header "Tâche de Refile")
-                                            (org-tags-match-list-sublevels nil)))
-                                     (tags-todo "-ANNULÉ/!-SOUTE-SUSPENDUE-GOAL"
-                                                ((org-agenda-overriding-header "Projets Bloqués")
-                                                 ))
-                                     (tags-todo "-ANNULÉ/!SUSPENDUE|SOUTE"
-                                                ((org-agenda-overriding-header "Attente ou Reporté Tâches")
-                                                 ))
-                                     (tags-todo "-ANNULÉ/!-PROCHAIN-SOUTE-ATTENDRE-VALUE-GOAL"
-                                                ((org-agenda-overriding-header "Tâches Disponibles")
-                                                 (org-agenda-sorting-strategy '(effort-up priority-down))))
-                                     ))))
+(setq org-agenda-custom-commands
+      (quote
+       (
+        ("N" "Notes" tags "NOTE"
+         ((org-agenda-overriding-header "Notes")
+          (org-tags-match-list-sublevels t)))
+        ("h" "Habits" tags-todo "STYLE=\"habit\""
+         ((org-agenda-overriding-header "Habits")
+          (org-agenda-sorting-strategy
+           '(todo-state-down priority-down category-keep))))
+        (" " "Ordre du Jour"
+         ((agenda "" nil)
+          (alltodo ""
+                   ((org-agenda-overriding-header "Tâches à la Représenter")
+                    (org-agenda-files '("~/Dropbox/GTD/inbox.org"))
+                    ))
+          (tags-todo "-SUSPENDUE-ANNULÉ/!PROCHAIN"
+                     ((org-agenda-overriding-header "Tâche Prochain")
+                      (org-tags-match-list-sublevels nil)))
+          (tags-todo "-SUSPENDUE-ANNULÉ/!TODO"
+                     ((org-agenda-overriding-header "Tâche de Travail")
+                      (org-agenda-sorting-strategy
+                       '(todo-state-down priority-down))))
+          (tags "REFILE"
+                ((org-agenda-overriding-header "Tâche de Refile")
+                 (org-tags-match-list-sublevels nil)))
+          (tags-todo "-ANNULÉ/!-SOUTE-SUSPENDUE-GOAL"
+                     ((org-agenda-overriding-header "Projets Bloqués")
+                      ))
+          (tags-todo "-ANNULÉ/!SUSPENDUE|SOUTE"
+                     ((org-agenda-overriding-header "Attente ou Reporté Tâches")
+                      ))
+          (tags-todo "-ANNULÉ/!-PROCHAIN-SOUTE-ATTENDRE-VALUE-GOAL"
+                     ((org-agenda-overriding-header "Tâches Disponibles")
+                      (org-agenda-sorting-strategy '(effort-up priority-down))))
+          ))))
       )
 
 (defun gas/org-inbox-capture ()
