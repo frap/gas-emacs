@@ -27,12 +27,6 @@
   :config
   (yas-reload-all))
 
-;; Intelligent sexp editing. M-x customize-group smartparens
-(use-package smartparens
-  :ensure t
-;;  :delight: "[]"
-  :config (require 'smartparens-config))
-
 ;; Project-aware operations
 ;; All projectile mappings are under C-c p
 (use-package projectile
@@ -206,7 +200,6 @@
 (delight  '((abbrev-mode " Abv" abbrev)
             (smart-tab-mode " \\t" smart-tab)
             (eldoc-mode nil "eldoc")
-            (rainbow-mode)
             (overwrite-mode " Ov" t)
             ))
 

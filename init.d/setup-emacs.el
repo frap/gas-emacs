@@ -13,8 +13,7 @@
 (use-package f
   :ensure t)
 
-;; Keep emacs customize settings in separate file
-
+;; Keep emacs customise settings in separate file
 (setq custom-file (expand-file-name "custom.el" user-emacs-directory))
      (when (file-exists-p custom-file)
        (load custom-file))
@@ -59,12 +58,15 @@
 (setq history-length 1000)
 
 ;; Undo/redo window configuration with C-c <left>/<right>
-(winner-mode 1)
+;(winner-mode 1)
+
 
 ;; Emacs server
-(require 'server)
-(unless (server-running-p)
-  (server-start))
+(use-package edit-server
+  :if window-system
+  :init
+  (add-hook 'after-init-hook 'server-start t)
+  (add-hook 'after-init-hook 'edit-server-start t))
 
 ;; Highlight matching parentheses when moving over them
 (show-paren-mode)

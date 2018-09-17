@@ -12,27 +12,45 @@
 ;;(set-fontset-font t 'unicode "Symbola" nil 'prepend)
 (set-fontset-font t 'unicode "Emoji One Color" nil 'prepend)
 
-(use-package color-theme-sanityinc-solarized :ensure t)
-(use-package color-theme-sanityinc-tomorrow :ensure t)
+(use-package ample-theme
+  :disabled
+  :init
+  (load-theme 'ample-flat t))
 
-(require 'color-theme-sanityinc-tomorrow)
-;;(require 'color-theme-tomorrow)
-;;(require 'sanityinc-tomorrow-day-theme)
+(use-package tao-theme
+  :disabled
+  :init
+  (load-theme 'tao-yin t)
+  :config
+  (use-package color-identifiers-mode))
 
-(require 'sanityinc-tomorrow-night-theme)
+(use-package panda-theme
+  :ensure t
+  :config
+  (load-theme 'panda t))
+
+(use-package dracula-theme
+  :disabled
+  :ensure t
+  :config
+  (load-theme 'dracula t))
+
+(use-package color-theme-sanityinc-solarized
+  :disabled
+  :config
+  (load-theme 'sanityinc-solarized-dark)
+  )
+
+(use-package color-theme-sanityinc-tomorrow
+  :disabled
+  :config
+  (load-theme 'sanityinc-tomorrow-blue))
+
 
 ;; Set theme & font size
 ;(add-to-list 'custom-theme-load-path "~/.emacs.d/lib/monokai-theme")
 ;(load-theme 'monokai t)
 
-(color-theme-sanityinc-solarized-dark)
-;(color-theme-sanityinc-solarized-light)
-;(color-theme-sanityinc-tomorrow-blue)
-;(color-theme-sanityinc-tomorrow-bright)
-;(color-theme-sanityinc-tomorrow-eighties)
-
-;;(color-theme-sanityinc-tomorrow-day)
-;;(color-theme-sanityinc-tomorrow-night)
 
 
 ;; (add-hook 'prog-mode-hook

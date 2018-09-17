@@ -30,7 +30,7 @@
 ;
 (defun figwheel-repl ()
   (interactive)
-  (inf-clojure "clojure -m figwheel.main"))
+  (inf-clojure "clojure -Afig"))
 
 
 ;(add-hook 'clojure-mode-hook #'inf-clojure-minor-mode)
@@ -51,8 +51,8 @@
   (add-hook 'cider-repl-mode-hook #'company-mode)
   (add-hook 'cider-mode-hook #'company-mode)
   (add-hook 'cider-mode-hook #'eldoc-mode)
-  (add-hook 'cider-mode-hook #'cider-hydra-mode)
-  (add-hook 'clojure-mode-hook #'paredit-mode)
+ ;; (add-hook 'cider-mode-hook #'cider-hydra-mode)
+ ;; (add-hook 'clojure-mode-hook #'paredit-mode)
   (setq cider-repl-use-pretty-printing t)
   (setq cider-repl-display-help-banner nil)
 ;;  (setq cider-cljs-lein-repl "(do (use 'figwheel-sidecar.repl-api) (start-figwheel!) (cljs-repl))")
@@ -102,9 +102,9 @@
 (use-package cider-eval-sexp-fu
   :ensure t)
 
-(use-package cider-hydra
-  :ensure t
-  )
+;(use-package cider-hydra
+;  :ensure t
+;  )
 
 
 (define-clojure-indent
@@ -170,8 +170,8 @@
 ;;            (figwheel-sidecar.repl-api/start-figwheel!)
 ;;            (figwheel-sidecar.repl-api/cljs-repl))")
 
-(sp-local-pair 'clojure-mode "#(" ")")
-(sp-local-pair 'clojure-mode "#{" "}")
+;;(sp-local-pair 'clojure-mode "#(" ")")
+;;(sp-local-pair 'clojure-mode "#{" "}")
 
 
 (defun cider-quit-all ()

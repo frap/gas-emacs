@@ -4,15 +4,15 @@
 ;; Discoverability
 
 (use-package company
-       :ensure t
-       :init
-       (setq company-dabbrev-ignore-case t
-             company-show-numbers t)
-       (add-hook 'after-init-hook 'global-company-mode)
-       :config
+  :ensure t
+  :init
+  (setq company-dabbrev-ignore-case t
+        company-show-numbers t)
+  (add-hook 'after-init-hook 'global-company-mode)
+  :config
 ;;       (add-to-list 'company-backends 'company-math-symbols-unicode)
-       :bind ("C-:" . company-complete)  ; In case I don't want to wait
-       :delight company-mode)
+  :bind ("C-:" . company-complete)  ; In case I don't want to wait
+  :delight company-mode)
 
 
 ;(use-package sql-interactive-mode
@@ -32,9 +32,7 @@
   :config
   (add-to-list 'auto-mode-alist '("\\.rest$" . restclient-mode)))
 
-(use-package avy :ensure t
-  :config
-  (global-set-key (kbd "C-:") 'avy-goto-char))
+
 
 (use-package terraform-mode
    :defer t

@@ -26,10 +26,6 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Provided by packages
 
-;; replace built-ins
-(global-set-key (kbd "M-x") 'helm-M-x)
-;; (global-set-key (kbd "C-x C-f") 'helm-find-files)
-
 ;; Hyper!
 (global-set-key (kbd "H-]") 'er/expand-region)
 (global-set-key (kbd "H-[") 'er/contract-region)

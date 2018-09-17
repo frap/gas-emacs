@@ -1,5 +1,5 @@
 
-;;(delight 'org-agenda-mode "📅")
+(delight 'org-agenda-mode "📅")
 
 (use-package org
   :ensure org-plus-contrib        ; But it comes with Emacs now!?
@@ -100,9 +100,10 @@
 
 (setq org-agenda-time-grid
       (quote
-       ((daily today remove-match)
+       ((daily today require-timed)
         (0830 1030 1230 1500 1700)
-        "......" "----------------")))
+        "......"
+        "----------------")))
 
 ;; couple of short-cut keys to make it easier to edit text.
 (defun org-text-bold () "Wraps the region with asterisks."
@@ -135,19 +136,21 @@
   :init (add-hook 'org-mode-hook 'org-bullets-mode))
 
 ;; quickly making the initial asterisks for listing items and whatnot, appear as Unicode bullets (without actually affecting the text file or the behavior).
-    (use-package org
-       :init
-       (font-lock-add-keywords 'org-mode
-        '(("^ +\\([-*]\\) "
-               (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•")))))))
+(use-package org
+ :init
+ (font-lock-add-keywords
+  'org-mode
+  '(("^ +\\([-*]\\) "
+     (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•")))))))
 
-(setq org-agenda-files (quote ("~/Dropbox/GTD/atea.org"
-                               "~/Dropbox/GTD/inbox.org"
-                               "~/Dropbox/GTD/someday.org"
-                                "~/Dropbox/GTD/prochain.org"
-                                "~/Dropbox/GTD/calendars/atea-cal.org"
-                                "~/Dropbox/GTD/calendars/changecontrol-cal.org"
-                                )))
+(setq org-agenda-files
+      (quote ("~/Dropbox/GTD/atea.org"
+              "~/Dropbox/GTD/inbox.org"
+              "~/Dropbox/GTD/someday.org"
+              "~/Dropbox/GTD/prochain.org"
+              "~/Dropbox/GTD/calendars/atea-cal.org"
+              "~/Dropbox/GTD/calendars/changecontrol-cal.org"
+              )))
 
 ;; Auto-update tags whenever the state is changed
 (setq org-todo-state-tags-triggers
@@ -158,6 +161,62 @@
 	("TODO" ("ATTENDRE") ("ANNULÉ") ("SUSPENDUE"))
 	("PROCHAIN" ("ATTENDRE") ("ANNULÉ") ("SUSPENDUE"))
 	("FINI" ("ATTENDRE") ("ANNULÉ") ("SUSPENDUE"))))
+;; todo state change changes
+    (setq org-todo-keyword-faces
+      '(("UN_JOUR"       :foreground "forest green" :weight bold)
+        ("PROCHAIN"      :foreground "blue" :weight bold)
+        ("EN_ATTENTE"    :foreground "yellow" :weight bold)
+        ("FINI"          :foreground "forest green" :weight bold)
+        ("ANNULÉ"        :foreground "orange" :weight bold)
+        ("TÉLÉPHONE"     :foreground "forest green" :weight bold)
+        ("GOAL"          :foreground "blue" :weight bold)
+        ("VALUE"         :foreground "red" :weight bold)
+        ("QUOTE"         :foreground "yellow" :weight bold)
+        ("DEAMONS"       :foreground "red" :weight bold)
+        ("RENDEZ-VOUS"   :foreground "forest green" :weight bold)
+        ))
+
+;; refile nay header lvel 1-3
+ (setq org-refile-targets '((nil :maxlevel . 5)
+                                (org-agenda-files :maxlevel . 5)))
+
+    ; Use full outline paths for refile targets - we file directly with IDO
+    (setq org-refile-use-outline-path t)
+
+    ; Targets complete directly with IDO
+    (setq org-outline-path-complete-in-steps nil)
+
+    ; Allow refile to create parent tasks with confirmation
+    (setq org-refile-allow-creating-parent-nodes (quote confirm))
+
+    ; Use IDO for both buffer and file completion and ido-everywhere to t
+    (setq org-completion-use-ido t)
+    (setq ido-everywhere t)
+    (setq ido-max-directory-size 100000)
+    (ido-mode (quote both))
+    ; Use the current window when visiting files and buffers with ido
+    (setq ido-default-file-method 'selected-window)
+    (setq ido-default-buffer-method 'selected-window)
+    ; Use the current window for indirect buffer display
+    (setq org-indirect-buffer-display 'current-window)
+
+   ;; archive mode
+   (setq org-archive-mark-done nil)
+   (setq org-archive-location "%s_archive::* Archived Tasks")
+   ;; Remove empty LOGBOOK drawers on clock out
+  (defun gas/remove-empty-drawer-on-clock-out ()
+     (interactive)
+     (save-excursion
+       (beginning-of-line 0)
+       (org-remove-empty-drawer-at "LOGBOOK" (point))))
+
+   (add-hook 'org-clock-out-hook 'gas/remove-empty-drawer-on-clock-out 'append)
+
+   (defun my/get-things-done ()
+      (interactive)
+      (find-file "~/Dropbox/GTD/atea.org"))
+
+    (global-set-key "\C-cd" 'my/get-things-done)
 ;; Resume clocking task when emacs is restarted
 (org-clock-persistence-insinuate)
 ;;
@@ -184,14 +243,10 @@
 ;; Include current clocking task in clock reports
 (setq org-clock-report-include-clocking-task t)
 ;; don't use pretty things for the clocktable
-(setq org-pretty-entities nil)
+;;(setq org-pretty-entities nil)
 ;; If idle for more than 15 minutes, resolve the things by asking what to do
 ;; with the clock time
 (setq org-clock-idle-time 15)
-
-(defun eos/org-clock-in ()
-  (interactive)
-  (org-clock-in '(4)))
 
 (global-set-key (kbd "<f5>") #'gas/punch-in)
 (global-set-key (kbd "C-c <f5>") #'gas/punch-out)
@@ -352,10 +407,6 @@
 
 (setq org-hide-emphasis-markers t)
 
-;; make asterisks appear as unicode bullets
-(font-lock-add-keywords 'org-mode
-                          '(("^ +\\([-*]\\) "
-                             (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•"))))))
 
 (use-package org-pomodoro
   :after org
@@ -434,7 +485,7 @@
 (setq org-agenda-block-separator nil)
 (setq org-agenda-start-with-log-mode t)
 
- (delight 'org-agenda-mode "øα")
+(delight 'org-agenda-mode "øα")
 
 (setq   org-agenda-custom-commands
         (quote (
@@ -453,6 +504,9 @@
                   (tags "-ANNULÉ/!PROCHAIN"
                         ((org-agenda-overriding-header "Tâches Courante")
                          (org-tags-match-list-sublevels nil)
+                         (org-agenda-files '("~/Dropbox/GTD/someday.org"
+                                             "~/Dropbox/GTD/atea.org"
+                                             "~/Dropbox/GTD/prochain.org"))
                          (org-agenda-sorting-strategy
                                '(todo-state-down priority-down))))
                   (tags-todo "-ANNULÉ/!TODO"
@@ -466,6 +520,13 @@
                   (tags-todo "-ANNULÉ/!ATTENDRE|SUSPENDUE"
                              ((org-agenda-overriding-header "Attente ou Reporté Tâches")
                               ))
+                  (todo "TODO"
+                        ((org-agenda-overriding-header "Tâches ponctuelles")
+                         (org-agenda-files '("~/Dropbox/GTD/prochain.org"))
+                         (org-agenda-skip-function '(org-agenda-skip-entry-if 'deadline 'scheduled))))
+                  (todo "TODO"
+                        ((org-agenda-overriding-header "Tâche de Refile")
+                         (org-agenda-files '("~/Dropbox/GTD/inbox.org"))))
                   ))))
         )
 
@@ -475,6 +536,16 @@
   (interactive)
   "Capture a task in agenda mode."
   (org-capture nil "t"))
+
+(defun gas/org-agenda-done (&optional arg)
+  "Mark current TODO as done.
+This changes the line at point, all other lines in the agenda referring to
+the same tree node, and the headline of the tree node in the Org-mode file."
+  (interactive "P")
+  (org-agenda-todo "FINI"))
+;; Override the key definition for org-exit
+(define-key org-agenda-mode-map "x" 'gas/org-agenda-done)
+
 
 (define-key org-agenda-mode-map "i" 'gas/punch-in)  ;; was 'org-agenda-clock-in
 ;;(define-key org-agenda-mode-map "r" 'gas/org-process-inbox)
@@ -502,6 +573,22 @@
                  (org-gcal-refresh-token)
                  (org-gcal-fetch))))
 
+;; structure templates
+(setq org-structure-template-alist
+      '(("s" "#+begin_src ?\n\n#+end_src" "<src lang=\"?\">\n\n</src>")
+        ("e" "#+begin_example\n?\n#+end_example" "<example>\n?\n</example>")
+        ("q" "#+begin_quote\n?\n#+end_quote" "<quote>\n?\n</quote>")
+        ("v" "#+BEGIN_VERSE\n?\n#+END_VERSE" "<verse>\n?\n</verse>")
+        ("c" "#+BEGIN_COMMENT\n?\n#+END_COMMENT")
+        ("p" "#+BEGIN_PRACTICE\n?\n#+END_PRACTICE")
+        ("l" "#+begin_src emacs-lisp\n?\n#+end_src" "<src lang=\"emacs-lisp\">\n?\n</src>")
+        ("L" "#+latex: " "<literal style=\"latex\">?</literal>")
+        ("h" "#+begin_html\n?\n#+end_html" "<literal style=\"html\">\n?\n</literal>")
+        ("H" "#+html: " "<literal style=\"html\">?</literal>")
+        ("a" "#+begin_ascii\n?\n#+end_ascii")
+        ("A" "#+ascii: ")
+        ("i" "#+index: ?" "#+index: ?")
+        ("I" "#+include %file ?" "<include file=%file markup=\"?\">")))
 
 (use-package ox-html
   :init

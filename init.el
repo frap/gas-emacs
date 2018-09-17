@@ -5,7 +5,7 @@
         ("melpa"        . "https://melpa.org/packages/")
         ("melpa-stable" . "https://stable.melpa.org/packages/")
         ("org"          . "http://orgmode.org/elpa/"))) ;; no https :(
-;;(package-initialize)
+(package-initialize)
 
 (setq package-user-dir
       (expand-file-name (concat "elpa-" (substring emacs-version 0 (string-match "\\." emacs-version 3)))
@@ -13,19 +13,33 @@
 
 (unless (file-exists-p (expand-file-name "archives/melpa" package-user-dir)) (package-refresh-contents))
 
-(unless (package-installed-p 'use-package)
-        (package-refresh-contents)
-        (package-install 'use-package))
+(unless (and (package-installed-p 'use-package)
+             (package-installed-p 'delight))
+  (package-refresh-contents)
+  (package-install 'use-package)
+  (package-install 'delight)
+  )
 
-(require 'use-package)
+(eval-when-compile
+  (require 'cl)
+  (require 'use-package)
+  (require 'delight)
+  (require 'bind-key)
+  )
+
+(setq use-package-always-ensure t)
+
 
 (if (equal "atearoot" user-login-name)
     (setq user-mail-address "agasson@ateasystems.com")
     (setq user-mail-address "agasson@red-elvis.net"))
 
-;(when (memq window-system '(mac ns x))
-;  (exec-path-from-shell-initialize))
 
+(use-package exec-path-from-shell
+  :ensure t
+  :if (memq window-system '(mac ns))
+  :config
+  (exec-path-from-shell-initialize))
 
 (use-package delight
   :ensure t
@@ -52,6 +66,8 @@
 (require 'better-defaults)
 
 (require 'setup-emacs)
+(require 'setup-navigation)
+
 (require 'setup-packages)
 (require 'setup-mode-packages)
 

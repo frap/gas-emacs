@@ -1,8 +1,6 @@
 ;;; Modes ;;;;
 
 (add-hook 'emacs-lisp-mode-hook 'prettify-symbols-mode)
-(add-hook 'clojure-mode-hook 'prettify-symbols-mode)
-
 
 (use-package elisp-mode
   :delight (emacs-lisp-mode "ξλ " :major)
@@ -25,15 +23,8 @@
               )))
 
 
-(use-package rainbow-delimiters
-    :ensure t
-    :config
-    (add-hook 'clojure-mode-hook 'rainbow-delimiters-mode)
-    (add-hook 'emacs-lisp-mode-hook 'rainbow-delimiters-mode)
-    :delight ("rainbow-mode" "🌈"))
-
 (global-highlight-parentheses-mode)
 
-;(add-hook 'eval-expression-minibuffer-setup-hook #'smartparens-mode)
+(add-hook 'eval-expression-minibuffer-setup-hook #'smartparens-mode)
 
 (provide 'setup-elisp)

@@ -96,27 +96,127 @@
     (while (> (point) up-to)
       (paredit-delete-indentation))))
 
-(use-package paredit
-  :ensure t
-  :delight " {}"
-  :init
-  (dolist (m (list 'emacs-lisp-mode-hook 'lisp-interaction-mode-hook 'eval-expression-minibuffer-setup-hook 'ielm-mode-hook 'clojurescript-mode))
-    (add-hook m 'enable-paredit-mode))
-  :bind ( ("M-^" . paredit-delete-indentation)
-          ("C-^" . paredit-remove-newlines)
-;         ("C-c d" . paredit-forward-down)
-;         ("C-M-f" . clojure-forward-logical-sexp)
-;         ("C-M-b" . clojure-backward-logical-sexp)
-;         ("C-M-{" . paredit-wrap-curly)
- ;        ("C-M-(" . paredit-wrap-round)
- ;        ("C-M-w" . sp-copy-sexp)
-           )
-  )
+
+;(use-package paredit
+;  :ensure t
+ ; :delight " {}"
+;  :init
+
+ ; (dolist (m (list 'emacs-lisp-mode-hook 'lisp-interaction-mode-hook 'eval-expression-minibuffer-setup-hook 'ielm-mode-hook 'clojurescript-mode))
+ ;   (add-hook m 'enable-paredit-mode))
+ ;:bind
+;  ( ("M-^" . paredit-delete-indentation)
+                                        ; ("C-^" . paredit-remove-newlines)
+                                        ;         ("C-c d" . paredit-forward-down)
+                                        ;         ("C-M-f" . clojure-forward-logical-sexp)
+                                        ;         ("C-M-b" . clojure-backward-logical-sexp)
+                                        ;         ("C-M-{" . paredit-wrap-curly)
+                                        ;        ("C-M-(" . paredit-wrap-round)
+                                        ;        ("C-M-w" . sp-copy-sexp)
+
+ ;  )
+;  )
 
  ;; Useful key sequences for positioning cursor on particular s-expressions:
 
  ;;  - C-M- a d :: Move to beginning of function and inside the
  ;;      declaration. Good start to just about any other positioning.
  ;; - C-M- d f d :: At beginning of function, moves to first s-expression.
+
+;; replacement for delete-indentation
+ (defun smartparens-delete-indentation (&optional arg)
+   "Handle joining lines that end in a comment."
+   (interactive "*P")
+   (let (comt)
+     (save-excursion
+       (move-beginning-of-line (if arg 1 0))
+       (when (skip-syntax-forward "^<" (point-at-eol))
+         (setq comt (delete-and-extract-region (point) (point-at-eol)))))
+     (delete-indentation arg)
+     (when comt
+       (save-excursion
+         (move-end-of-line 1)
+         (insert " ")
+         (insert comt)))))
+
+; While =M-SPC= (especially =M-0 M-SPC=) is good for cleaning up extra
+;  white space on a single line, let's use this function to get rid of
+;  it all.
+ (defun smartparens-remove-newlines ()
+      "Removes extras whitespace and newlines from the current point
+    to the next parenthesis."
+      (interactive)
+      (let ((up-to (point))
+            (from (re-search-forward "[])}]")))
+         (backward-char)
+         (while (> (point) up-to)
+           (smartparens-delete-indentation))))
+
+(use-package smartparens
+  ;; :delight " {}"
+  :bind (:map smartparens-mode-map
+              ("M-^" . smartparens-delete-indentation)
+              ("C-^" . smartparens-remove-newlines)
+              ("C-M-f" . sp-forward-sexp)
+              ("C-M-b" . sp-backward-sexp)
+              ("C-M-u" . sp-backward-up-sexp)
+              ("C-M-d" . sp-down-sexp)
+              ("C-M-p" . sp-backward-down-sexp)
+              ("C-M-n" . sp-up-sexp)
+              ("M-s" . sp-splice-sexp)
+              ("C-M-<up>" . sp-splice-sexp-killing-backward)
+              ("C-M-<down>" . sp-splice-sexp-killing-forward)
+              ("C-M-r" . sp-splice-sexp-killing-around)
+              ("C-)" . sp-forward-slurp-sexp)
+              ("C-<right>" . sp-forward-slurp-sexp)
+              ("C-}" . sp-forward-barf-sexp)
+              ("C-<left>" . sp-forward-barf-sexp)
+              ("C-(" . sp-backward-slurp-sexp)
+              ("C-M-<left>" . sp-backward-slurp-sexp)
+              ("C-{" . sp-backward-barf-sexp)
+              ("C-M-<right>" . sp-backward-barf-sexp)
+              ("M-S" . sp-split-sexp))
+  :hook
+  (after-init . smartparens-global-strict-mode)
+  :config
+  (require 'smartparens-config)
+  ;; Org-mode config
+  (sp-with-modes 'org-mode
+    (sp-local-pair "'" nil :unless '(sp-point-after-word-p))
+    (sp-local-pair "*" "*" :actions '(insert wrap) :unless
+                   '(sp-point-after-word-p sp-point-at-bol-p)
+                   :wrap "C-*" :skip-match 'sp--org-skip-asterisk)
+    (sp-local-pair "_" "_" :unless '(sp-point-after-word-p))
+    (sp-local-pair "/" "/" :unless '(sp-point-after-word-p)
+                   :post-handlers '(("[d1]" "SPC")))
+    (sp-local-pair "~" "~" :unless '(sp-point-after-word-p)
+                   :post-handlers '(("[d1]" "SPC")))
+    (sp-local-pair "=" "=" :unless '(sp-point-after-word-p)
+                   :post-handlers '(("[d1]" "SPC")))
+    (sp-local-pair "«" "»"))
+
+  (defun sp--org-skip-asterisk (ms mb me)
+    (or (and (= (line-beginning-position) mb)
+             (eq 32 (char-after (1+ mb))))
+        (and (= (1+ (line-beginning-position)) me)
+             (eq 32 (char-after me))))))
+
+
+(use-package rainbow-delimiters
+    :ensure t
+    :config
+    (add-hook 'prog-mode-hook 'rainbow-delimiters-mode)
+    (add-hook 'clojure-mode-hook 'rainbow-delimiters-mode)
+    (add-hook 'emacs-lisp-mode-hook 'rainbow-delimiters-mode)
+    :delight ("rainbow-mode" "🌈"))
+; keep things indented correctly
+(use-package aggressive-indent
+      :ensure t)
+; expand parenthesis ??
+  (add-hook 'prog-mode-hook 'electric-pair-mode)
+;   Always show matching parenthesis.
+ (show-paren-mode 1)
+     (setq show-paren-delay 0)
+
 
 (provide 'setup-programming)
