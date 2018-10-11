@@ -50,6 +50,8 @@
 (set-keyboard-coding-system 'utf-8) ; pretty
 (set-selection-coding-system 'utf-8) ; please
 (prefer-coding-system 'utf-8) ; with sugar on top
+(when (display-graphic-p)
+   (setq x-select-request-type '(UTF8_STRING COMPOUND_TEXT TEXT STRING)))
 
 ;; Show active region
 (transient-mark-mode 1)
@@ -94,10 +96,10 @@
 (require 'uniquify)
 (setq uniquify-buffer-name-style 'forward)
 
-;; A betterr ediff
-(setq ediff-diff-options "-w")
-(setq ediff-split-window-function 'split-window-horizontally)
-(setq ediff-window-setup-function 'ediff-setup-windows-plain)
+;; A better ediff
+;(setq ediff-diff-options "-w")
+;(setq ediff-split-window-function 'split-window-horizontally)
+;(setq ediff-window-setup-function 'ediff-setup-windows-plain)
 
 ;; No electric indent
 (setq electric-indent-mode nil)

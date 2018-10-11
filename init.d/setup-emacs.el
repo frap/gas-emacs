@@ -1,5 +1,12 @@
-(eval-when-compile (require 'cl-lib))
+;; Timestamp: <>
+;(eval-when-compile (require 'cl-lib))
 ;(require 'cl)
+;; more useful frame title, that show either a file or a
+;; buffer name (if the buffer isn't visiting a file)
+(setq frame-title-format
+      '("Gas " invocation-name " - " (:eval (if (buffer-file-name)
+                                                    (abbreviate-file-name (buffer-file-name))
+                                                  "%b"))))
 
 ;; functional
 (use-package dash
@@ -50,8 +57,36 @@
 (put 'narrow-to-region 'disabled nil)
 
 ;; Save a list of recent files visited. (open recent file with C-x f)
-(recentf-mode 1)
-(setq recentf-max-saved-items 100) ;; just 20 is too recent
+(use-package recentf
+  :init
+  (recentf-mode 1)
+
+  :config
+
+  ;; Increase limit
+  (setq recentf-max-menu-items 100)
+
+  ;; Emacs
+  (add-to-list 'recentf-exclude (format "%s/Dev/emacs/\\(?!\\(gas.*\\)\\)" (getenv "HOME")))
+  (add-to-list 'recentf-exclude (format "%s/\\.emacs\\.d/.*" (getenv "HOME")))
+
+  ;; Some caches
+  (add-to-list 'recentf-exclude (format "%s/\\.ido\\.last" (getenv "HOME")))
+  (add-to-list 'recentf-exclude (format "%s/\\.recentf" (getenv "HOME")))
+
+  ;; elfeed
+  (add-to-list 'recentf-exclude (format "%s/\\.elfeed/.*" (getenv "HOME")))
+  (add-to-list 'recentf-exclude (format "%s/Dropbox/emacs/elfeed/.*" (getenv "HOME")))
+
+  ;; Org-mode organisation
+  (add-to-list 'recentf-exclude (format "%s/Dropbox/GTD/organisation/.*" (getenv "HOME")))
+
+  ;; Org/todo/calendars
+  (add-to-list 'recentf-exclude ".*todo.org")
+  (add-to-list 'recentf-exclude (format "%s/Dropbox/Calendars/.*" (getenv "HOME")))
+
+  ;; Maildir
+  (add-to-list 'recentf-exclude (format "%s/maildir.*" (getenv "HOME"))))
 
 ;; Save minibuffer history
 (savehist-mode 1)
@@ -60,15 +95,14 @@
 ;; Undo/redo window configuration with C-c <left>/<right>
 ;(winner-mode 1)
 
+;; Suppress “ad-handle-definition: .. redefined” warnings during Emacs startup.
+(customize-set-variable 'ad-redefinition-action 'accept)
 
 ;; Emacs server
 (use-package edit-server
-  :if window-system
+ :if window-system
   :init
   (add-hook 'after-init-hook 'server-start t)
   (add-hook 'after-init-hook 'edit-server-start t))
-
-;; Highlight matching parentheses when moving over them
-(show-paren-mode)
 
 (provide 'setup-emacs)

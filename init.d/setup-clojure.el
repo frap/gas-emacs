@@ -62,7 +62,7 @@
 ;;(  cider-namespace-refresh)
 )
 
-(setq cider-default-cljs-repl 'nashorn)
+;(setq cider-default-cljs-repl 'nashorn)
 
 ;(use-package clj-refactor
 ;  :ensure t
@@ -126,7 +126,7 @@
     (await 1)
     (async 0))
 
-(put-clojure-indent 'component 1)
+;(put-clojure-indent 'component 1)
 
 (setq plexus/clojure-fill-column 45)
 
@@ -234,5 +234,25 @@ be reused."
         exact-buff)
     (or (cider--select-zombie-buffer repl-buffers) 'new)))
 
+
+(use-package parinfer
+  :disabled
+  :bind
+  (("C-," . parinfer-toggle-mode))
+  :init
+  (setq parinfer-extensions
+        '(defaults       ; should be included.
+           pretty-parens  ; different paren styles for different modes.
+           ;;evil           ; If you use Evil.
+           lispy          ; If you use Lispy. With this extension, you should install Lispy and do not enable lispy-mode directly.
+           paredit        ; Introduce some paredit commands.
+           smart-tab      ; C-b & C-f jump positions and smart shift with tab & S-tab.
+           smart-yank))   ; Yank behavior depend on mode.
+  :hook
+  ((clojure-mode
+    emacs-lisp-mode
+    common-lisp-mode
+    scheme-mode
+    lisp-mode) . parinfer-mode))
 
 (provide 'setup-clojure)

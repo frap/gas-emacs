@@ -1,3 +1,19 @@
+;; Timestamp: <>
+(when (>= emacs-major-version 26)
+  (pixel-scroll-mode))
+
+(use-package smooth-scrolling
+  :config
+  (smooth-scrolling-mode 1))
+
+
+
+;; WinnerMode makes it possible to cycle and undo window configuration changes (i.e. arrangement of panels, etc.)
+(when (fboundp 'winner-mode) (winner-mode))
+
+;; Highlight matching parentheses when moving over them
+(show-paren-mode)
+
 ;; use ace-window
  (use-package ace-window
       :ensure t
@@ -90,27 +106,11 @@
   :bind ("M-x" . smex)
   ("M-X" . smex-major-mode-commands))
 
-;; helm project can be intrusive so use its features with C-x c
+; If I don't know what I'm after, Helm is better:
 (use-package helm
        :ensure t
-       :init
-       (use-package helm-config))
-
-;The [[helm-swoop]] project has a nice DWIM replacement for isearch-forward-symbol-at-point (bound to M-s .):
-(use-package helm-swoop
-       :ensure t
-       :init
-       ;; If this value is t, split window inside the current window
-       (setq helm-swoop-split-with-multiple-windows t
-             ;; If you prefer fuzzy matching
-             helm-swoop-use-fuzzy-match t)
-       :bind
-       (("M-s s" . helm-swoop)  ;; overbind M-i ?
-        ("M-s S" . helm-multi-swoop)))
-
-(define-key helm-swoop-map (kbd "C-s") 'helm-next-line)
-(define-key helm-swoop-map (kbd "C-r") 'helm-previous-line)
-
+       :bind  (("C-x M-i" . helm-imenu))
+       )
 
 ;; Silver searcher (ag)
 (use-package ag

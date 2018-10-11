@@ -14,18 +14,87 @@
 ;; better file path manipulation functions
 (use-package f :ensure t)
 
+;; dired and stuff
+(use-package dired
+  :ensure nil
+  :config
+
+  ;; Adapt ls for mac
+  (when (eq system-type 'darwin)
+    (require 'ls-lisp)
+    (setq ls-lisp-use-insert-directory-program t
+          insert-directory-program "/usr/local/bin/gls"))
+
+  ;; Omitting
+  (setq-default dired-omit-files "^\\.[^.]+"
+                dired-omit-mode t)
+
+  ;; Adapt ls lisp format
+  (if (boundp 'ls-lisp-ignore-case)
+      (setq ls-lisp-ignore-case t))
+  (if (boundp 'ls-lisp-dirs-first)
+      (setq ls-lisp-dirs-first t))
+  (if (boundp 'ls-lisp-use-localized-time-format)
+      (setq ls-lisp-use-localized-time-format t))
+  (if (boundp 'ls-lisp-format-time-list)
+      (setq ls-lisp-format-time-list '("%Y-%m-%d %H:%M" "%Y-%m-%d %H:%M")))
+
+  (put 'dired-find-alternate-file 'disabled nil)
+
+  (setq dired-dwim-target t
+
+        ;; Compression
+        auto-compression-mode t
+
+        ;; Recursive
+        dired-recursive-deletes 'top
+        dired-recursive-copies 'always
+
+        ;; Details information
+        dired-listing-switches "--group-directories-first -alh"
+        dired-details-hidden-string "[...]")
+
+  ;; Keys
+  (define-key dired-mode-map (kbd "C-o") 'dired-omit-mode)
+  (define-key dired-mode-map (kbd "<C-return>") 'dired-open-native)
+  (define-key dired-mode-map (kbd "e") 'dired-open-externally)
+
+
+  ;; Diff
+  (defun ora-ediff-files ()
+    (interactive)
+    (let ((files (dired-get-marked-files))
+          (wnd (current-window-configuration)))
+      (if (<= (length files) 2)
+          (let ((file1 (car files))
+                (file2 (if (cdr files)
+                           (cadr files)
+                         (read-file-name
+                          "file: "
+                          (dired-dwim-target-directory)))))
+            (if (file-newer-than-file-p file1 file2)
+                (ediff-files file2 file1)
+              (ediff-files file1 file2))
+            (add-hook 'ediff-after-quit-hook-internal
+                      (lambda ()
+                        (setq ediff-after-quit-hook-internal nil)
+                        (set-window-configuration wnd))))
+        (error "no more than 2 files should be marked"))))
+  (define-key dired-mode-map "E" 'ora-ediff-files)
+  )
+
+(use-package dired-narrow
+  :ensure t
+  :config
+  (define-key dired-mode-map (kbd "/") 'dired-narrow)
+)
+
+
 ;; Make fill column visible
 (use-package fill-column-indicator
   :ensure t
   :config
   (setq fci-rule-color "#111122"))
-
-;; Expand snippets
-(use-package yasnippet
-  :ensure t
-  :delight "γ"
-  :config
-  (yas-reload-all))
 
 ;; Project-aware operations
 ;; All projectile mappings are under C-c p
@@ -33,7 +102,33 @@
   :ensure t
   :delight projectile-mode
   :config
-  (projectile-global-mode))
+   ;; Global configuration
+    (setq projectile-switch-project-action 'neotree-projectile-action
+          projectile-enable-caching t
+          projectile-create-missing-test-files t
+          projectile-switch-project-action #'projectile-commander
+          projectile-ignored-project-function 'file-remote-p)
+
+    ;; Defining some helpers
+    (def-projectile-commander-method ?s
+      "Open a *shell* buffer for the project."
+      ;; This requires a snapshot version of Projectile.
+      (projectile-run-shell))
+
+    (def-projectile-commander-method ?c
+      "Run `compile' in the project."
+      (projectile-compile-project nil))
+
+    (def-projectile-commander-method ?\C-?
+      "Go back to project selection."
+      (projectile-switch-project))
+
+    ;; Keys
+    (setq projectile-keymap-prefix (kbd "C-x p"))
+
+    ;; Activate globally
+    (projectile-mode)
+)
 
 ;; IDO-like navigation
 ;; (use-package helm :ensure t
@@ -153,23 +248,14 @@
          ("C-<"         . mc/mark-previous-like-this)
          ("C-c C-<"     . mc/mark-all-like-this)))
 
-(use-package magit
-  :ensure t
-  :bind (("H-g" . magit-status)))
+;; Global configuration
+(setq tramp-default-method "ssh")
+(setq password-cache-expiry 60)
+(setq tramp-auto-save-directory temporary-file-directory)
 
-
-;;(use-package string-edit :ensure t)
-
-;; Highlight Symbol
-;; (use-package highlight-symbol
-;;   :ensure t
-;;   :init
-;;   (progn
-;;     (remove-hook 'prog-mode-hook
-;;       (lambda ()
-;; (highlight-symbol-mode)
-;; (highlight-symbol-nav-mode)))
-;;     (setq highlight-symbol-idle-delay 0.25)))
+;; Debug
+;;(setq tramp-verbose 9)
+(setq tramp-debug-buffer nil)
 
 (use-package ace-jump-mode :ensure t
   :bind (("H-'" . ace-jump-mode)
@@ -177,17 +263,6 @@
          ("H-," . ace-jump-mode-pop-mark)
          ("C-M-s-<" . ace-jump-mode-pop-mark))
   :config (ace-jump-mode-enable-mark-sync))
-
-(use-package mastodon :ensure t
-  :init
-  (setq mastodon-instance-url
-        "https://toot.cat"
-        ;;"https://mastodon.social"
-        ))
-
-(use-package emojify :ensure t
-  :config
-  (global-emojify-mode))
 
 (use-package edn :ensure t)
 
@@ -199,7 +274,6 @@
 
 (delight  '((abbrev-mode " Abv" abbrev)
             (smart-tab-mode " \\t" smart-tab)
-            (eldoc-mode nil "eldoc")
             (overwrite-mode " Ov" t)
             ))
 
