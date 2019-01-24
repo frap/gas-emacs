@@ -1,4 +1,3 @@
-
 (use-package clojure-mode
   :ensure t
   :delight "☯λlj"
@@ -33,13 +32,7 @@
   (inf-clojure "clojure -Afig"))
 
 
-;(add-hook 'clojure-mode-hook #'inf-clojure-minor-mode)
-
-(use-package aggressive-indent
-    :ensure t
-    :delight aggressive-indent-mode
-    :config
-    (add-hook 'clojure-mode-hook 'aggressive-indent-mode))
+                                        ;(add-hook 'clojure-mode-hook #'inf-clojure-minor-mode)
 
 (use-package html-to-hiccup :ensure t)
 
@@ -102,68 +95,46 @@
 (use-package cider-eval-sexp-fu
   :ensure t)
 
-;(use-package cider-hydra
-;  :ensure t
-;  )
-
-
-(define-clojure-indent
-    (GET 2)
-    (POST 2)
-    (PUT 2)
-    (DELETE 2)
-    (context 2)
-    (case-of 2)
-    (js/React.createElement 2)
-    (element 2)
-    (s/fdef 1)
-    (filter-routes 1)
-    (catch-pg-key-error 1)
-    (handle-pg-key-error 2)
-    (prop/for-all 1)
-    (at 1)
-    (promise 1)
-    (await 1)
-    (async 0))
-
-;(put-clojure-indent 'component 1)
+                                        ;(use-package cider-hydra
+                                        ;  :ensure t
+                                        ;  )
 
 (setq plexus/clojure-fill-column 45)
 
 (defun plexus/cider-eval-and-insert ()
-    (interactive)
-    (let* ((lbp (line-beginning-position))
-           (comment-pos (search-backward ";;=>" lbp t)))
-      (if comment-pos
-          (progn
-            (goto-char comment-pos)
-            (delete-region comment-pos (line-end-position))
-            (cider-eval-last-sexp t)
-            (goto-char comment-pos)
-            (insert ";;=> "))
+  (interactive)
+  (let* ((lbp (line-beginning-position))
+         (comment-pos (search-backward ";;=>" lbp t)))
+    (if comment-pos
         (progn
-          (delete-horizontal-space)
-          (let ((pos (point)))
-            (cider-eval-last-sexp t)
-            (goto-char pos)
-            (insert
-             (format
-              (format "%%%ds;;=> " (if (= (current-column) 0)
-                                       0
-                                     (max 0 (+ (- plexus/clojure-fill-column (current-column)) 2))))
-              "")))))))
+          (goto-char comment-pos)
+          (delete-region comment-pos (line-end-position))
+          (cider-eval-last-sexp t)
+          (goto-char comment-pos)
+          (insert ";;=> "))
+      (progn
+        (delete-horizontal-space)
+        (let ((pos (point)))
+          (cider-eval-last-sexp t)
+          (goto-char pos)
+          (insert
+           (format
+            (format "%%%ds;;=> " (if (= (current-column) 0)
+                                     0
+                                   (max 0 (+ (- plexus/clojure-fill-column (current-column)) 2))))
+            "")))))))
 
 
-  (define-key cider-mode-map (kbd "C-x C-e") 'cider-eval-last-sexp)
-  (define-key cider-mode-map (kbd "C-x C-w") 'plexus/cider-eval-and-insert)
-  (define-key cider-mode-map (kbd "H-SPC") 'cider-eval-defun-at-point)
-  ;;(define-key cider-mode-map (kbd "M-TAB") 'cider-eval-last-sexp)
-  ;;(define-key cider-mode-map (kbd "C-M-i") 'completion-at-point)
+;; (define-key cider-mode-map (kbd "C-x C-e") 'cider-eval-last-sexp)
+;;(define-key cider-mode-map (kbd "C-x C-w") 'plexus/cider-eval-and-insert)
+;;(define-key cider-mode-map (kbd "H-SPC") 'cider-eval-defun-at-point)
+;;(define-key cider-mode-map (kbd "M-TAB") 'cider-eval-last-sexp)
+;;(define-key cider-mode-map (kbd "C-M-i") 'completion-at-point)
 
-  (define-key cider-mode-map (kbd "M-TAB") 'company-complete)
-  (define-key cider-mode-map (kbd "C-M-i") 'company-complete)
+;;(define-key cider-mode-map (kbd "M-TAB") 'company-complete)
+;;(define-key cider-mode-map (kbd "C-M-i") 'company-complete)
 
-;(use-package inf-clojure :ensure t)
+                                        ;(use-package inf-clojure :ensure t)
 
 ;; (setq cider-cljs-lein-repl
 ;;       "(do (require 'figwheel-sidecar.repl-api)

@@ -1,12 +1,31 @@
 ;; Timestamp: <>
-;(eval-when-compile (require 'cl-lib))
-;(require 'cl)
+
+;; =============
+;; MODIFIER KEYS
+
+;; Both command keys are 'Super'
+(setq mac-right-command-modifier 'super)
+(setq mac-command-modifier 'super)
+
+
+;; Option or Alt is naturally 'Meta'
+(setq mac-option-modifier 'meta)
+
+
+;; Right Alt (option) can be used to enter symbols like em dashes '—' and euros '€' and stuff.
+(setq mac-right-option-modifier 'nil)
+
+;; Control is control, and you also need to change Caps Lock to Control in the Keyboard
+;; preferences in macOS.
+
+;; =============
+
 ;; more useful frame title, that show either a file or a
 ;; buffer name (if the buffer isn't visiting a file)
 (setq frame-title-format
       '("Gas " invocation-name " - " (:eval (if (buffer-file-name)
-                                                    (abbreviate-file-name (buffer-file-name))
-                                                  "%b"))))
+                                                (abbreviate-file-name (buffer-file-name))
+                                              "%b"))))
 
 ;; functional
 (use-package dash
@@ -19,11 +38,6 @@
 ;; File manipulation
 (use-package f
   :ensure t)
-
-;; Keep emacs customise settings in separate file
-(setq custom-file (expand-file-name "custom.el" user-emacs-directory))
-     (when (file-exists-p custom-file)
-       (load custom-file))
 
 
 ;; Write backup files to own directory
@@ -60,31 +74,23 @@
 (use-package recentf
   :init
   (recentf-mode 1)
-
   :config
-
   ;; Increase limit
   (setq recentf-max-menu-items 100)
-
   ;; Emacs
   (add-to-list 'recentf-exclude (format "%s/Dev/emacs/\\(?!\\(gas.*\\)\\)" (getenv "HOME")))
   (add-to-list 'recentf-exclude (format "%s/\\.emacs\\.d/.*" (getenv "HOME")))
-
   ;; Some caches
   (add-to-list 'recentf-exclude (format "%s/\\.ido\\.last" (getenv "HOME")))
   (add-to-list 'recentf-exclude (format "%s/\\.recentf" (getenv "HOME")))
-
   ;; elfeed
   (add-to-list 'recentf-exclude (format "%s/\\.elfeed/.*" (getenv "HOME")))
   (add-to-list 'recentf-exclude (format "%s/Dropbox/emacs/elfeed/.*" (getenv "HOME")))
-
   ;; Org-mode organisation
-  (add-to-list 'recentf-exclude (format "%s/Dropbox/GTD/organisation/.*" (getenv "HOME")))
-
+  (add-to-list 'recentf-exclude (format "%s/Dropbox/GTD/.*" (getenv "HOME")))
   ;; Org/todo/calendars
   (add-to-list 'recentf-exclude ".*todo.org")
   (add-to-list 'recentf-exclude (format "%s/Dropbox/Calendars/.*" (getenv "HOME")))
-
   ;; Maildir
   (add-to-list 'recentf-exclude (format "%s/maildir.*" (getenv "HOME"))))
 
@@ -92,8 +98,11 @@
 (savehist-mode 1)
 (setq history-length 1000)
 
-;; Undo/redo window configuration with C-c <left>/<right>
-;(winner-mode 1)
+
+;; Enable winner mode to quickly restore window configurations
+(winner-mode 1)
+(global-set-key (kbd "M-s-[") 'winner-undo)
+(global-set-key (kbd "M-s-]") 'winner-redo)
 
 ;; Suppress “ad-handle-definition: .. redefined” warnings during Emacs startup.
 (customize-set-variable 'ad-redefinition-action 'accept)

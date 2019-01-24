@@ -1,17 +1,80 @@
-;; Packages that pertain to specific modes or languages, and that don't have
-;; their own setup-*.el
-;; Timestamp: <>
+;; ============
+;; TEXT EDITING
 
-;; linum-mode has performance issues ith large files
+;; Expand-region allows to gradually expand selection inside words, sentences, expressions, etc.
+(use-package expand-region
+  :config
+  (global-set-key (kbd "s-'") 'er/expand-region)         ;; Cmd+' (apostrophe) to expand
+  (global-set-key (kbd "s-S-'") 'er/contract-region))    ;; Cmd+" (same, but with shift) to contract
+
+;; highlight search
+(use-package anzu
+  :ensure t
+  :delight
+  :config
+  (global-anzu-mode t))
+
+;; Move-text lines around with meta-up/down.
+(use-package move-text
+  :config
+  (move-text-default-bindings))
+
+
+;; Quickly insert new lines above or below the current line, with correct indentation.
+(defun smart-open-line ()
+  "Insert an empty line after the current line. Position the cursor at its beginning, according to the current mode."
+  (interactive)
+  (move-end-of-line nil)
+  (newline-and-indent))
+
+(defun smart-open-line-above ()
+  "Insert an empty line above the current line. Position the cursor at it's beginning, according to the current mode."
+  (interactive)
+  (move-beginning-of-line nil)
+  (newline-and-indent)
+  (forward-line -1)
+  (indent-according-to-mode))
+
+(global-set-key (kbd "s-<return>") 'smart-open-line)            ;; Cmd+Return new line below
+(global-set-key (kbd "s-S-<return>") 'smart-open-line-above)    ;; Cmd+Shift+Return new line above
+
+
+;; Upcase and lowercase word or region, if selected.
+;; To capitalize or un-capitalize word use Alt+c and Alt+l
+(global-set-key (kbd "M-u") 'upcase-dwim)   ;; Alt+u upcase
+(global-set-key (kbd "M-l") 'downcase-dwim) ;; Alt-l lowercase
+
+
+;; Comment line or region.
+(global-set-key (kbd "s-/") 'comment-line)
+
+
+;; Visually find and replace text
+(use-package visual-regexp
+  :config
+  (define-key global-map (kbd "M-s-f") 'vr/replace)
+  (define-key global-map (kbd "s-r") 'vr/replace))  ;; Cmd+r find and replace
+
+
+;; Multiple cursors. Similar to Sublime or VS Code.
+(use-package multiple-cursors
+  :config
+  (setq mc/always-run-for-all 1)
+  (global-set-key (kbd "s-d") 'mc/mark-next-like-this)        ;; Cmd+d select next occurrence of region
+  (global-set-key (kbd "s-D") 'mc/mark-all-dwim)              ;; Cmd+Shift+d select all occurrences
+  (global-set-key (kbd "M-s-d") 'mc/edit-beginnings-of-lines) ;; Alt+Cmd+d add cursor to each line in region
+  (define-key mc/keymap (kbd "<return>") nil))
+
+;; linum-mode has performance issues with large files
 (when (>= emacs-major-version 26)
   (use-package display-line-numbers
-    :disabled
+ ;;   :disabled
     :defer nil
     :ensure t
     :config
     (global-display-line-numbers-mode)))
 
-;; show traiiling whitesdapce in red
+;; show traiiling whitespace in red
 (customize-set-variable 'show-trailing-whitespace t)
 ;; dont use hard-tabs
 (customize-set-variable 'indent-tabs-mode nil)
@@ -19,60 +82,47 @@
 
 (add-hook 'before-save-hook 'delete-trailing-whitespace)
 
-(use-package flyspell
-  :ensure t
+;; ===========================
+;; SPELLCHECKING AND THESAURUS
+
+
+;; Spellchecking requires an external command to be available. Install aspell on your Mac, then make it the default checker for Emacs' ispell. Note that personal dictionary is located at ~/.aspell.LANG.pws by default.
+(setq ispell-program-name "aspell")
+
+
+;; Popup window for spellchecking
+(use-package flyspell-correct)
+(use-package flyspell-correct-popup)
+
+
+;; Enable spellcheck on the fly for all text modes. This includes org, latex and LaTeX.
+(add-hook 'text-mode-hook 'flyspell-mode)
+(add-hook 'prog-mode-hook 'flyspell-prog-mode)
+
+
+;; Enable right mouse click on macOS to see the list of suggestions.
+(eval-after-load "flyspell"
+  '(progn
+     (define-key flyspell-mouse-map [down-mouse-3] #'flyspell-correct-word)
+     (define-key flyspell-mouse-map [mouse-3] #'undefined)))
+
+
+;; Spellcheck current word
+(define-key flyspell-mode-map (kbd "s-\\") 'flyspell-correct-previous-word-generic) ;; Cmd+\ spellcheck word with popup
+(define-key flyspell-mode-map (kbd "C-s-\\") 'ispell-word)                          ;; Ctrl+Cmd+\ spellcheck word using built UI
+
+
+;; Search for synonyms
+(use-package powerthesaurus
   :config
-
-  ;; Set programms
-  (setq-default ispell-program-name "aspell")
-  (setq-default ispell-list-command "--list")
-
-  ;; Refresh flyspell after directory change
-  (defun flyspell-buffer-after-pdict-save (&rest _)
-    (flyspell-buffer))
-  (advice-add 'ispell-pdict-save :after #'flyspell-buffer-after-pdict-save)
-
-  ;; Popup
-  (defun flyspell-emacs-popup-textual (event poss word)
-    "A textual flyspell popup menu."
-    (require 'popup)
-    (let* ((corrects (if flyspell-sort-corrections
-                         (sort (car (cdr (cdr poss))) 'string<)
-                       (car (cdr (cdr poss)))))
-           (cor-menu (if (consp corrects)
-                         (mapcar (lambda (correct)
-                                   (list correct correct))
-                                 corrects)
-                       '()))
-           (affix (car (cdr (cdr (cdr poss)))))
-           show-affix-info
-           (base-menu  (let ((save (if (and (consp affix) show-affix-info)
-                                       (list
-                                        (list (concat "Save affix: " (car affix))
-                                              'save)
-                                        '("Accept (session)" session)
-                                        '("Accept (buffer)" buffer))
-                                     '(("Save word" save)
-                                       ("Accept (session)" session)
-                                       ("Accept (buffer)" buffer)))))
-                         (if (consp cor-menu)
-                             (append cor-menu (cons "" save))
-                           save)))
-           (menu (mapcar
-                  (lambda (arg) (if (consp arg) (car arg) arg))
-                  base-menu)))
-      (cadr (assoc (popup-menu* menu :scroll-bar t) base-menu))))
+  (global-set-key (kbd "s-|") 'powerthesaurus-lookup-word-dwim)) ;; Cmd+Shift+\ search thesaurus
 
 
-  (defun flyspell-emacs-popup-choose (org-fun event poss word)
-    (if (window-system)
-        (funcall org-fun event poss word)
-      (flyspell-emacs-popup-textual event poss word)))
+;; Word definition search
+(use-package define-word
+  :config
+  (global-set-key (kbd "M-\\") 'define-word-at-point))
 
-  (eval-after-load "flyspell"
-    '(progn
-       (advice-add 'flyspell-emacs-popup :around #'flyspell-emacs-popup-choose)))
-  )
 
 (use-package fic-mode
   :commands fic-mode

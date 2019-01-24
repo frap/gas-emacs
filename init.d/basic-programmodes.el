@@ -186,14 +186,7 @@
  ;  )
 ;  )
 
- ;; Useful key sequences for positioning cursor on particular s-expressions:
 
- ;;  - C-M- a d :: Move to beginning of function and inside the
- ;;      declaration. Good start to just about any other positioning.
- ;; - C-M- d f d :: At beginning of function, moves to first s-expression.
-
-
-;; Timestamp: <>
 
 ;(use-package sql-interactive-mode
 ;  :init
@@ -203,32 +196,27 @@
 ;(use-package sql-indent :ensure t)
 
 (use-package yaml-mode :ensure t)
-(use-package feature-mode :ensure t)
-
-;(use-package elixir-mode :ensure t)
-
-(use-package restclient
-  :ensure t
-  :config
-  (add-to-list 'auto-mode-alist '("\\.rest$" . restclient-mode)))
-
 
 
 (use-package terraform-mode
-   :defer t
-   :init
-    ; (progn
-    ;   (require 'company-terraform)
-    ;   (company-terraform-init)
-    ;  )
-   :config (setq terraform-indent-level 2)
-)
-
-(use-package fish-mode
-  :mode "\\.fish\\'"
-  :interpreter "fish")
-
+  :defer t
+  :init
+                                        ; (progn
+                                        ;   (require 'company-terraform)
+                                        ;   (company-terraform-init)
+                                        ;  )
+  :config (setq terraform-indent-level 2)
+  )
+(use-package elixir-mode
+  :ensure t)
 
 (use-package nix-mode)
+
+(add-hook 'makefile-mode-hook
+          (lambda()
+            (setq show-trailing-whitespace t)))
+
+;;This sets the buffer-local variable show-trailing-whitespace,
+;;only for Makefiles (including Makefile.am and Makefile
 
 (provide 'basic-programmodes)

@@ -5,21 +5,6 @@
   (prog-mode       . turn-on-eldoc-mode)
   (cider-repl-mode . turn-on-eldoc-mode))
 
-;; Shared setup for all coding modes
-(defun live-coding ()
-  (interactive)
-  (set-face-attribute 'default nil :font "Hack-18")
-  (add-hook 'prog-mode-hook 'command-log-mode)
-  ;;(add-hook 'prog-mode-hook (lambda () (focus-mode 1)))
-  )
-
-(defun normal-coding ()
-  (interactive)
-  (set-face-attribute 'default nil :font "Hack-14")
-  (add-hook 'prog-mode-hook 'command-log-mode)
-  ;;(add-hook 'prog-mode-hook (lambda () (focus-mode 1)))
-  )
-
 (use-package ediff
   :config
   (autoload 'diff-mode "diff-mode" "Diff major mode" t)
@@ -42,6 +27,9 @@
         company-minimum-prefix-length 2
         company-tooltip-align-annotations t
         company-tooltip-flip-when-above t)
+  :config
+  (define-key company-mode-map [remap hippie-expand] 'company-complete)
+  (define-key company-active-map [remap hippie-expand] 'company-complete)
   :hook
   (after-init . global-company-mode)
 ;;       (add-to-list 'company-backends 'company-math-symbols-unicode)
@@ -53,13 +41,69 @@
   :defer 5
   :ensure t
   :delight "γ"
+ :init
+  (yas-global-mode 1)
   :config
-  (yas-reload-all)
-  (add-to-list 'company-backends '(company-yasnippet)))
+  (add-to-list 'yas-snippet-dirs (locate-user-emacs-file "snippets")))
 
-
+;; Use only own snippets, do not use bundled ones
+;;(setq yas-snippet-dirs '("~/.emacs.d/snippets"))
 (use-package yasnippet-snippets
   :ensure t
+  )
+
+;; Jump to end of snippet definition
+(define-key yas-keymap (kbd "<return>") 'yas-exit-all-snippets)
+
+;; Inter-field navigation
+(defun yas/goto-end-of-active-field ()
+  (interactive)
+  (let* ((snippet (car (yas--snippets-at-point)))
+         (position (yas--field-end (yas--snippet-active-field snippet))))
+    (if (= (point) position)
+        (move-end-of-line 1)
+      (goto-char position))))
+
+(defun yas/goto-start-of-active-field ()
+  (interactive)
+  (let* ((snippet (car (yas--snippets-at-point)))
+        (position (yas--field-start (yas--snippet-active-field snippet))))
+    (if (= (point) position)
+        (move-beginning-of-line 1)
+      (goto-char position))))
+
+(define-key yas-keymap (kbd "C-e") 'yas/goto-end-of-active-field)
+(define-key yas-keymap (kbd "C-a") 'yas/goto-start-of-active-field)
+
+(defun autoinsert-yas-expand()
+  "Replace text in yasnippet template."
+  (yas-expand-snippet (buffer-string) (point-min) (point-max)))
+
+;; No dropdowns please, yas
+(setq yas-prompt-functions '(yas-ido-prompt yas-completing-prompt))
+
+;; No need to be so verbose
+(setq yas-verbosity 1)
+
+;; Wrap around region
+(setq yas-wrap-around-region t)
+
+(use-package autoinsert
+  :init
+  ;; Don't want to be prompted before insertion:
+  (setq auto-insert-query nil)
+
+  (setq auto-insert-directory (locate-user-emacs-file "templates"))
+  (add-hook 'find-file-hook 'auto-insert)
+  (auto-insert-mode 1)
+
+  :config
+  (define-auto-insert "\\.el$" ["default-lisp.el" autoinsert-yas-expand])
+  (define-auto-insert "\\.sh$" ["default-sh.sh" autoinsert-yas-expand])
+  (define-auto-insert "/bin/"  ["default-sh.sh" autoinsert-yas-expand])
+  (define-auto-insert "\\.mk$" ["default-makefile.mk" autoinsert-yas-expand])
+  (define-auto-insert "Makefile" ["default-makefile.mk" autoinsert-yas-expand])
+  (define-auto-insert "\\.html?$" ["default-html.html" autoinsert-yas-expand])
   )
 
 ;; replacement for delete-indentation
@@ -144,12 +188,22 @@
 (use-package iedit
   :config (set-face-background 'iedit-occurrence "Magenta"))
 
-
 ; keep things indented correctly
 (use-package aggressive-indent
-      :ensure t)
+  :ensure t
+  :delight aggressive-indent-mode
+  :config
+  (global-aggressive-indent-mode)
+  (add-hook 'clojure-mode-hook 'aggressive-indent-mode)
+  (add-to-list 'aggressive-indent-excluded-modes 'html-mode)
+  (add-to-list 'aggressive-indent-excluded-modes 'sql-mode)
+  (add-to-list 'aggressive-indent-excluded-modes 'web-mode))
+
 ; expand parenthesis ??
 (add-hook 'prog-mode-hook 'electric-pair-mode)
+(add-hook 'prog-mode-hook 'column-number-mode)    ; show column numbers
+(add-hook 'prog-mode-hook 'eldoc-mode)            ; always use eldoc
+
 ;   Always show matching parenthesis.
 (show-paren-mode 1)
 (setq show-paren-delay 0)

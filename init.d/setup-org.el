@@ -70,28 +70,6 @@
                ("^\\*+ \\(FINI\\) "
                 (1 (progn (compose-region (match-beginning 1) (match-end 1) "✔")
                           nil)))))
-  (let* ((variable-tuple
-            (cond ((x-list-fonts   "Source Sans Pro") '(:font   "Source Sans Pro"))
-                  ((x-list-fonts   "Lucida Grande")   '(:font   "Lucida Grande"))
-                  ((x-list-fonts   "Verdana")         '(:font   "Verdana"))
-                  ((x-family-fonts "Sans Serif")      '(:family "Sans Serif"))
-                  (nil (warn "Cannot find a Sans Serif Font.  Install Source Sans Pro."))))
-           (base-font-color (face-foreground 'default nil 'default))
-           (headline       `(:inherit default :weight bold :foreground ,base-font-color)))
-
-      (custom-theme-set-faces
-       'user
-       `(org-level-8        ((t (,@headline ,@variable-tuple))))
-       `(org-level-7        ((t (,@headline ,@variable-tuple))))
-       `(org-level-6        ((t (,@headline ,@variable-tuple))))
-       `(org-level-5        ((t (,@headline ,@variable-tuple))))
-       `(org-level-4        ((t (,@headline ,@variable-tuple :height 1.1))))
-       `(org-level-3        ((t (,@headline ,@variable-tuple :height 1.25))))
-       `(org-level-2        ((t (,@headline ,@variable-tuple :height 1.5))))
-       `(org-level-1        ((t (,@headline ,@variable-tuple :height 1.75))))
-       `(org-document-title ((t (,@headline ,@variable-tuple :height 2.0 :underline nil))))))
-    (eval-after-load 'face-remap '(delight 'buffer-face-mode))
-    (eval-after-load 'simple '(delight 'visual-line-mode))
 
   (add-to-list 'org-structure-template-alist '("el" "#+BEGIN_SRC emacs-lisp :tangle yes?\n\n#+END_SRC"))
  ;  (define-key org-mode-map (kbd "M-C-u") 'outline-up-heading)
@@ -104,22 +82,48 @@
                                                   (org-return-indent))))
 )
 
-;; By default, org-indent produces an indicator "Ind" in the modeline. We use diminish to hide it.
-(use-package org-indent
-  :ensure nil
-  :delight)
+(setq org-agenda-files
+      (quote ("~/Dropbox/GTD/atea.org"
+              "~/Dropbox/GTD/inbox.org"
+              "~/Dropbox/GTD/tickler.org"
+              "~/Dropbox/GTD/prochain.org"
+              "~/Dropbox/GTD/someday.org"
+              "~/Dropbox/GTD/calendars/atea-cal.org"
+              "~/Dropbox/GTD/calendars/changecontrol-cal.org"
+              )))
 
-(use-package org-drill
-  :ensure nil
-   )
+(setq org-todo-keywords
+      '((sequence "TODO(t)" "PROCHAIN(n)" "TÉLÉPHONE(p)" "RÉUNION(r)" "|" "FINI(f)")
+        (sequence "ATTENTE(w@/!)" "SUSPENDUE(s@/!)" "|" "ANNULÉ(c@/!)" )))
 
-(use-package org-mime
-  :ensure t)
+(setq org-log-done 'time)
+(setq org-log-into-drawer t)
+(setq org-log-state-notes-insert-after-drawers nil)
 
-;; hugo blogging
-(use-package ox-hugo
-  :defer 3
-  :after org)
+;; Auto-update tags whenever the state is changed
+(setq org-todo-state-tags-triggers
+      '(("ANNULÉ" ("ANNULÉ" . t))
+	("ATTENTE" ("ATTENTE" . t))
+	("SUSPENDUE" ("ATTENTE") ("SUSPENDUE" . t))
+	(done ("ATTENTE") ("SUSPENDUE"))
+	("TODO" ("ATTENTE") ("ANNULÉ") ("SUSPENDUE"))
+	("PROCHAIN" ("ATTENTE") ("ANNULÉ") ("SUSPENDUE"))
+	("FINI" ("ATTENTE") ("ANNULÉ") ("SUSPENDUE"))))
+
+;; todo state change changes
+(setq org-todo-keyword-faces
+      '(("UN_JOUR"       :foreground "forest green" :weight bold)
+        ("PROCHAIN"      :foreground "blue" :weight bold)
+        ("ATTENTE"       :foreground "yellow" :weight bold)
+        ("FINI"          :foreground "forest green" :weight bold)
+        ("ANNULÉ"        :foreground "orange" :weight bold)
+        ("TÉLÉPHONE"     :foreground "forest green" :weight bold)
+        ("GOAL"          :foreground "blue" :weight bold)
+        ("VALUE"         :foreground "red" :weight bold)
+        ("QUOTE"         :foreground "yellow" :weight bold)
+        ("DEAMONS"       :foreground "red" :weight bold)
+        ("RÉUNION"   :foreground "forest green" :weight bold)
+        ))
 
 ;; couple of short-cut keys to make it easier to edit text.
 (defun org-text-bold () "Wraps the region with asterisks."
@@ -188,46 +192,41 @@
   :defer 3
   :after org)
 
-;; quickly making the initial asterisks for listing items and whatnot, appear as Unicode bullets (without actually affecting the text file or the behaviour).
-;(use-package org
-; :init
-; (font-lock-add-keywords
-;  'org-mode
-;  '(("^ +\\([-*]\\) "
-;     (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•")))))))
+(setq org-capture-templates
+       (quote (("t" "todo :@bureau:" entry (file "~/Dropbox/GTD/inbox.org")
+                "* TODO %?\n%U\n%a\n" :clock-in t :clock-resume t)
+               ("T" "Tickler" entry
+                               (file+headline "~/Dropbox/GTD/tickler.org" "Tickler")
+                               "* %i%? \n %U")
+               ("r" "respond" entry (file "~/Dropbox/GTD/inbox.org")
+                "* PROCHAIN Respond to %:from on %:subject :@bureau:\nSCHEDULED: %t\n%U\n%a\n" :clock-in t :clock-resume t :immediate-finish t)
+               ("n" "Les notes" entry (file "~/Dropbox/GTD/inbox.org")
+                "* %? :NOTE:\n%U\n%a\n" :clock-in t :clock-resume t)
+               ("j" "un note quotidien"     entry
+                (file (get-journal-file-today))
+                "* %?\n\n  %i\n\n  From: %a" :empty-lines 1 :clock-in t :clock-resume t)
+               ("m" "Meeting" entry (file "~/Dropbox/GTD/calendars/atea-cal.org")
+                "* RÉUNION with %? :RÉUNION:@bureau:\n%U" :clock-in t :clock-resume t)
+               ("p" "Phone call" entry (file+headline "~/Dropbox/GTD/atea.org" "Interruptions")
+                "* TÉLÉPHONE %? :TÉLÉPHONE:@bureau:\n%U" :clock-in t :clock-resume t)
+               ("h" "Habit🙈" entry (file "~/Dropbox/GTD/atea.org")
+                "* TODO %?\n%U\n%a\nSCHEDULED: %(format-time-string \"%<<%Y-%m-%d %a .+1d/3d>>\")\n:PROPERTIES:\n:STYLE: habit\n:REPEAT_TO_STATE: PROCHAIN\n:END:\n")
+               ))
+                )
 
-(setq org-todo-keywords
-      '((sequence "TODO(t)" "PROCHAIN(n)" "TÉLÉPHONE(p)" "RÉUNION(r)" "|" "FINI(f)")
-        (sequence "ATTENTE(w@/!)" "SUSPENDUE(s@/!)" "|" "ANNULÉ(c@/!)" )))
+(setq org-tag-alist (quote (("@errand" . ?e)
+                            ("@bureau" . ?o)
+                            ("@maison" . ?h)
+                            ("@ferme"  . ?f)
+                            (:newline)
+                            ("ATTENTE"  . ?w)
+                            ("SUSPENDUE" . ?H)
+                            ("ANNULÉ"    . ?c)
+                            ("RÉUNION"   . ?m)
+                            ("TÉLÉPHONE" . ?p))))
 
-(setq org-log-done 'time)
-(setq org-log-into-drawer t)
-(setq org-log-state-notes-insert-after-drawers nil)
-
-;; Auto-update tags whenever the state is changed
-(setq org-todo-state-tags-triggers
-      '(("ANNULÉ" ("ANNULÉ" . t))
-	("ATTENTE" ("ATTENTE" . t))
-	("SUSPENDUE" ("ATTENTE") ("SUSPENDUE" . t))
-	(done ("ATTENTE") ("SUSPENDUE"))
-	("TODO" ("ATTENTE") ("ANNULÉ") ("SUSPENDUE"))
-	("PROCHAIN" ("ATTENTE") ("ANNULÉ") ("SUSPENDUE"))
-	("FINI" ("ATTENTE") ("ANNULÉ") ("SUSPENDUE"))))
-
-;; todo state change changes
-(setq org-todo-keyword-faces
-      '(("UN_JOUR"       :foreground "forest green" :weight bold)
-        ("PROCHAIN"      :foreground "blue" :weight bold)
-        ("ATTENTE"       :foreground "yellow" :weight bold)
-        ("FINI"          :foreground "forest green" :weight bold)
-        ("ANNULÉ"        :foreground "orange" :weight bold)
-        ("TÉLÉPHONE"     :foreground "forest green" :weight bold)
-        ("GOAL"          :foreground "blue" :weight bold)
-        ("VALUE"         :foreground "red" :weight bold)
-        ("QUOTE"         :foreground "yellow" :weight bold)
-        ("DEAMONS"       :foreground "red" :weight bold)
-        ("RÉUNION"   :foreground "forest green" :weight bold)
-        ))
+; Allow setting single tags without the menu
+(setq org-fast-tag-selection-single-key (quote expert))
 
 ;; Refiling
 ; Targets include this file and any file contributing to the agenda - up to 9 levels deep
@@ -243,6 +242,14 @@
 ; Allow refile to create parent tasks with confirmation
 (setq org-refile-allow-creating-parent-nodes (quote confirm))
 
+; Exclude DONE state tasks from refile targets
+(defun bh/verify-refile-target ()
+  "Exclude todo keywords with a done state from refile targets"
+  (not (member (nth 2 (org-heading-components)) org-done-keywords)))
+
+(setq org-refile-target-verify-function 'bh/verify-refile-target)
+
+;;;; IDO setup
 ; Use IDO for both buffer and file completion and ido-everywhere to t
 (setq org-completion-use-ido t)
 (setq ido-everywhere t)
@@ -254,13 +261,73 @@
 ; Use the current window for indirect buffer display
 (setq org-indirect-buffer-display 'current-window)
 
-;;;; Refile settings
-; Exclude DONE state tasks from refile targets
-(defun bh/verify-refile-target ()
-  "Exclude todo keywords with a done state from refile targets"
-  (not (member (nth 2 (org-heading-components)) org-done-keywords)))
 
-(setq org-refile-target-verify-function 'bh/verify-refile-target)
+;;;; Org-agenda
+(setq org-agenda-start-with-log-mode t)
+;; Compact the block agenda view
+(setq org-agenda-compact-blocks t)
+;; Set the default agenda-view to 2 days
+(setq org-agenda-span 1)
+;; deadline warning
+(setq org-deadline-warning-days 10)
+
+(setq org-agenda-time-grid
+      (quote
+       ((daily today require-timed)
+        (0800 1000 1200 1400 1600 1800)
+        "......"
+        "----------------")))
+
+(setq org-agenda-custom-commands
+  (quote
+   (
+   (" " "Agenda"
+         ((agenda "" nil)
+         (tags "REFILE"
+               ((org-agenda-overriding-header "Tâches à la Représenter")
+                 (org-tags-match-list-sublevels nil)))
+         (tags-todo "-ANNULÉ/!PROCHAIN"
+                        ((org-agenda-overriding-header "Tâches Courante")
+                         (org-tags-match-list-sublevels nil)
+                         (org-agenda-sorting-strategy
+                               '(todo-state-down priority-down category-keep))))
+         (tags-todo "-ATTENTE-ANNULÉ/!"
+               ((org-agenda-overriding-header "Projets")
+             ;   (org-agenda-skip-function #'gas/skip-non-projects)
+                (org-tags-match-list-sublevels 'indented)
+                (org-agenda-sorting-strategy
+                             '(category-keep))))
+         (tags-todo "-ANNULÉ/!"
+               ((org-agenda-overriding-header "Projets Bloqués")
+             ;   (org-agenda-skip-function #'gas/skip-non-stuck-projects)
+                (org-agenda-sorting-strategy
+                             '(category-keep))))
+         (tags-todo "-ANNULÉ+ATTENTE|SUSPENDUE/!"
+                   ((org-agenda-overriding-header "Attente ou Reporté Tâches")
+                     ))
+         (tags-todo "-SUSPENDUE-ANNULÉ-ATTENTE/+TODO"
+               ((org-agenda-overriding-header "Tâches n'appartenant pas à un Projet")
+              ;  (org-agenda-skip-function
+              ;  (org-query-select "headline" (org-query-gtd-loose-task)))
+                (org-agenda-skip-function '(org-agenda-skip-entry-if 'deadline 'scheduled))))
+         (tags-todo "/+PROCHAIN"
+              ((org-agenda-overriding-header "Tâches à Venir en Projets actifs")
+            ;   (org-agenda-skip-function (org-query-select "headline" (org-query-gtd-active-project-next-task)))
+               (org-tags-match-list-sublevels t)
+               (org-agenda-todo-ignore-scheduled 't)
+               (org-agenda-todo-ignore-deadlines 't)
+               (org-agenda-todo-ignore-with-date 't)
+               (org-agenda-sorting-strategy
+                '(todo-state-down effort-up category-keep))))
+          (tags-todo "/!PROCHAIN"
+              ((org-agenda-overriding-header "Projets actifs avec des tâches à venir")
+             ;  (org-agenda-skip-function (org-query-select "tree" (org-query-gtd-active-project-armed)))
+               (org-tags-match-list-sublevels 't)
+               (org-agenda-sorting-strategy
+                '(category-keep))))
+         nil)))))
+
+
 
 
 (global-set-key (kbd "<f5>") #'gas/punch-in)
@@ -273,15 +340,6 @@
 
 
 ;; CLOCKING
-;; Remove empty LOGBOOK drawers on clock out
-(defun gas/remove-empty-drawer-on-clock-out ()
-  (interactive)
-  (save-excursion
-    (beginning-of-line 0)
-    (org-remove-empty-drawer-at "LOGBOOK" (point))))
-
-(add-hook 'org-clock-out-hook 'gas/remove-empty-drawer-on-clock-out 'append)
-
 
 ;; Resume clocking task when emacs is restarted
 (org-clock-persistence-insinuate)
@@ -506,7 +564,6 @@ Callers of this function already widen the buffer view."
 
 (setq org-columns-default-format "%14SCHEDULED(When) %Effort{:} %CLOCKSUM(Clked){:} %1PRIORITY %TODO(State) %50ITEM(Task) %TAGS(Tags)")
 
-
 (add-hook 'org-clock-out-hook 'gas/clock-out-maybe 'append)
 
 ;; C-c C-x e 3 of 0:45
@@ -548,7 +605,6 @@ Callers of this function already widen the buffer view."
                   `(org-link ((t (:underline nil))))
                   `(org-date ((t (:underline nil)))))
 
-(require 'setup-orgagenda)
 ;;(org-journal-update-auto-mode-alist)
 
 (use-package org-journal
@@ -570,53 +626,7 @@ Callers of this function already widen the buffer view."
 
 ;;(global-set-key (kbd "C-c f j") 'journal-file-today)
 
-
-
-(defun ha/first-header ()
-  (goto-char (point-min))
-  (search-forward-regexp "^\* ")
-  (beginning-of-line 1)
-  (point))
-
-(setq org-deadline-warning-days 10)
-
-(setq org-capture-templates
-       (quote (("t" "todo :@bureau:" entry (file "~/Dropbox/GTD/inbox.org")
-                "* TODO %?\n%U\n%a\n" :clock-in t :clock-resume t)
-               ("T" "Tickler" entry
-                               (file+headline "~/Dropbox/GTD/tickler.org" "Tickler")
-                               "* %i%? \n %U")
-               ("r" "respond" entry (file "~/Dropbox/GTD/inbox.org")
-                "* PROCHAIN Respond to %:from on %:subject :@bureau:\nSCHEDULED: %t\n%U\n%a\n" :clock-in t :clock-resume t :immediate-finish t)
-               ("n" "Les notes" entry (file "~/Dropbox/GTD/inbox.org")
-                "* %? :NOTE:\n%U\n%a\n" :clock-in t :clock-resume t)
-               ("j" "un note quotidien"     entry
-                (file (get-journal-file-today))
-                "* %?\n\n  %i\n\n  From: %a" :empty-lines 1 :clock-in t :clock-resume t)
-               ("m" "Meeting" entry (file "~/Dropbox/GTD/calendars/atea-cal.org")
-                "* RÉUNION with %? :RÉUNION:@bureau:\n%U" :clock-in t :clock-resume t)
-               ("p" "Phone call" entry (file+headline "~/Dropbox/GTD/atea.org" "Interruptions")
-                "* TÉLÉPHONE %? :TÉLÉPHONE:@bureau:\n%U" :clock-in t :clock-resume t)
-               ("h" "Habit🙈" entry (file "~/Dropbox/GTD/atea.org")
-                "* TODO %?\n%U\n%a\nSCHEDULED: %(format-time-string \"%<<%Y-%m-%d %a .+1d/3d>>\")\n:PROPERTIES:\n:STYLE: habit\n:REPEAT_TO_STATE: PROCHAIN\n:END:\n")
-               ))
-                )
-
-(setq org-tag-alist (quote (("@errand" . ?e)
-                            ("@bureau" . ?o)
-                            ("@maison" . ?h)
-                            ("@ferme"  . ?f)
-                            (:newline)
-                            ("ATTENTE"  . ?w)
-                            ("SUSPENDUE" . ?H)
-                            ("ANNULÉ"    . ?c)
-                            ("RÉUNION"   . ?m)
-                            ("TÉLÉPHONE" . ?p))))
-
-; Allow setting single tags without the menu
-(setq org-fast-tag-selection-single-key (quote expert))
-
-
+;;; org-gcal
 (setq package-check-signature nil)
 (use-package org-gcal
   :ensure t
@@ -638,43 +648,12 @@ Callers of this function already widen the buffer view."
                  (org-gcal-refresh-token)
                  (org-gcal-fetch))))
 
-;; structure templates
-(setq org-structure-template-alist
-      '(("s" "#+begin_src ?\n\n#+end_src" "<src lang=\"?\">\n\n</src>")
-        ("e" "#+begin_example\n?\n#+end_example" "<example>\n?\n</example>")
-        ("q" "#+begin_quote\n?\n#+end_quote" "<quote>\n?\n</quote>")
-        ("v" "#+BEGIN_VERSE\n?\n#+END_VERSE" "<verse>\n?\n</verse>")
-        ("c" "#+BEGIN_COMMENT\n?\n#+END_COMMENT")
-        ("p" "#+BEGIN_PRACTICE\n?\n#+END_PRACTICE")
-        ("l" "#+begin_src emacs-lisp\n?\n#+end_src" "<src lang=\"emacs-lisp\">\n?\n</src>")
-        ("L" "#+latex: " "<literal style=\"latex\">?</literal>")
-        ("h" "#+begin_html\n?\n#+end_html" "<literal style=\"html\">\n?\n</literal>")
-        ("H" "#+html: " "<literal style=\"html\">?</literal>")
-        ("a" "#+begin_ascii\n?\n#+end_ascii")
-        ("A" "#+ascii: ")
-        ("i" "#+index: ?" "#+index: ?")
-        ("I" "#+include %file ?" "<include file=%file markup=\"?\">")))
-;(use-package ox-html
-;  :init
-;  (setq org-html-postamble nil)
-;  (setq org-export-with-section-numbers nil)
-;  (setq org-export-with-toc nil)
-;  (setq org-html-head-extra "
-;          <link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700,400italic,700italic&subset=latin,latin-ext' rel='stylesheet' type='text/css'>
-;          <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,700' rel='stylesheet' type='text/css'>
- ;         <style type='text/css'>
-  ;           body {
-  ;              font-family: 'Source Sans Pro', sans-serif;
- ;            }
- ;            pre, code {
- ;               font-family: 'Source Code Pro', monospace;
- ;            }
- ;         </style>"))
-
-
 (require 'ox-publish)
-;;  (require 'ox-rss)
 
+;; hugo blogging
+(use-package ox-hugo
+  :defer 3
+  :after org)
 
 (use-package ob-plantuml
   :ensure nil
@@ -719,6 +698,7 @@ Callers of this function already widen the buffer view."
           ("e" "#+begin_example\n?\n#+end_example" "<example>\n?\n</example>")
           ("q" "#+begin_quote\n?\n#+end_quote" "<quote>\n?\n</quote>")
           ("v" "#+begin_verse\n?\n#+end_verse" "<verse>\n?\n/verse>")
+          ("n" "#+begin_note\n?\n#+end_note" "<note>\n?\n/note>")
           ("c" "#+begin_center\n?\n#+end_center" "<center>\n?\n/center>")
           ("l" "#+begin_export latex\n?\n#+end_export" "<literal style=\"latex\">\n?\n</literal>")
           ("L" "#+latex: " "<literal style=\"latex\">?</literal>")
@@ -752,8 +732,9 @@ _q_: quote         _e_: emacs lisp  _i_: index:
 _E_: example       _p_: python      _I_: INCLUDE:
 _v_: verse         _P_: perl        _H_: HTML:
 _a_: ascii         _u_: Plantuml    _A_: ASCII:
-_l_: latex         _d_: ditaa       _c_: clojure
+_l_: latex         _d_: ditaa
 _h_: html          _S_: shell
+_n_: note          _c_: clojure
 "
     ("s" (hot-expand "<s"))
     ("E" (hot-expand "<e"))
@@ -762,6 +743,7 @@ _h_: html          _S_: shell
     ("C" (hot-expand "<c"))
     ("l" (hot-expand "<l"))
     ("h" (hot-expand "<h"))
+    ("n" (hot-expand "<n"))
     ("a" (hot-expand "<a"))
     ("L" (hot-expand "<L"))
     ("i" (hot-expand "<i"))
@@ -788,57 +770,13 @@ _h_: html          _S_: shell
 (use-package ox-reveal
   :ensure ox-reveal
   :init
-  (setq org-reveal-root "file:///Users/agasson/Dev/js/reveal.js/js/")
+  (setq org-reveal-root "file:///Users/agasson/Dev/js/reveal.js")
+  (setq org-reveal-hlevel 2)
   (setq org-reveal-postamble "Andrés Gasson")
   (setq org-reveal-mathjax t)
-  ;;(setq org-reveal-external-plugins (klipse . "{:src '%splugin/klipse_reveal.js'}"))
+  (setq org-reveal-klipsfy-src t)
+  ;(setq org-reveal-external-plugins (klipse . "{:src '%splugin/klipse_reveal.js'}"))
   )
-
-(defun org-reveal-src-block (src-block contents info)
-  "Transcode a SRC-BLOCK element from Org to Reveal.
-CONTENTS holds the contents of the item.  INFO is a plist holding
-contextual information."
-  (if (org-export-read-attribute :attr_html src-block :textarea)
-      (org-html--textarea-block src-block)
-    (let* ((use-highlight (org-reveal--using-highlight.js info))
-           (lang (org-element-property :language src-block))
-           (caption (org-export-get-caption src-block))
-           (code (if (not use-highlight)
-                     (org-html-format-code src-block info)
-                   (cl-letf (((symbol-function 'org-html-htmlize-region-for-paste)
-                              #'buffer-substring))
-                     (org-html-format-code src-block info))))
-           (frag (org-export-read-attribute :attr_reveal src-block :frag))
-           (code-attribs (or (org-export-read-attribute
-                         :attr_reveal src-block :code_attribs) ""))
-           (label (let ((lbl (org-element-property :name src-block)))
-                    (if (not lbl) ""
-                      (format " id=\"%s\"" lbl))))
-           (klipsify  (and (assoc 'klipse org-reveal-external-plugins)
-                           (member lang '("javascript" "ruby" "scheme" "clojure" "php"))))
-                      )
-      (if (not lang)
-          (format "<pre %s%s>\n%s</pre>"
-                  (or (frag-class frag info) " class=\"example\"")
-                  label
-                  code)
-        (format
-         "<div %sclass=\"org-src-container\">\n%s%s\n</div>%s"
-         (if klipsify "style=\"display:none;\" " "")
-         (if (not caption) ""
-           (format "<label class=\"org-src-name\">%s</label>"
-                   (org-export-data caption info)))
-         (if use-highlight
-             (format "\n<pre%s%s><code class=\"%s\" %s>%s</code></pre>"
-                     (or (frag-class frag info) "")
-                     label lang code-attribs code)
-           (format "\n<pre %s%s>%s</pre>"
-                   (or (frag-class frag info)
-                       (format " class=\"src src-%s\"" lang))
-                   label code)
-           )
-         (if klipsify (format "<klipse-snippet data-language=\"%s\">%s</klipse-snippet>"
-                              lang code) ""))))))
 
 
 (provide 'setup-org)

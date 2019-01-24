@@ -1,18 +1,108 @@
 ;; Timestamp: <>
-(when (>= emacs-major-version 26)
-  (pixel-scroll-mode))
 
-(use-package smooth-scrolling
-  :config
-  (smooth-scrolling-mode 1))
+;; ================
+;; BASIC NAVIGATION
 
 
+;; Move around with Cmd+i/j/k/l. This is not for everybody, and it takes away four very well placed
+;; key combinations, but if you get used to using these keys instead of arrows, it will be worth it,
+;; I promise.
+(global-set-key (kbd "s-i") 'previous-line)
+(global-set-key (kbd "s-k") 'next-line)
+(global-set-key (kbd "s-j") 'left-char)
+(global-set-key (kbd "s-l") 'right-char)
 
-;; WinnerMode makes it possible to cycle and undo window configuration changes (i.e. arrangement of panels, etc.)
-(when (fboundp 'winner-mode) (winner-mode))
+
+;; Kill line with CMD-Backspace. Note that thanks to Simpleclip, killing doesn't rewrite the system clipboard.
+;; Kill one word with Alt+Backspace.
+;; Kill forward word with Alt-Shift-Backspace.
+(global-set-key (kbd "s-<backspace>") 'kill-whole-line)
+(global-set-key (kbd "M-S-<backspace>") 'kill-word)
+
+
+;; Use Cmd for movement and selection.
+(global-set-key (kbd "s-<right>") (kbd "C-e"))        ;; End of line
+(global-set-key (kbd "S-s-<right>") (kbd "C-S-e"))    ;; Select to end of line
+(global-set-key (kbd "s-<left>") (kbd "M-m"))         ;; Beginning of line (first non-whitespace character)
+(global-set-key (kbd "S-s-<left>") (kbd "M-S-m"))     ;; Select to beginning of line
+
+(global-set-key (kbd "s-<up>") 'beginning-of-buffer)  ;; First line
+(global-set-key (kbd "s-<down>") 'end-of-buffer)      ;; Last line
+
+
+;; Thanks to Bozhidar Batsov
+;; http://emacsredux.com/blog/2013/]05/22/smarter-navigation-to-the-beginning-of-a-line/
+(defun smarter-move-beginning-of-line (arg)
+  "Move point back to indentation of beginning of line.
+
+Move point to the first non-whitespace character on this line.
+If point is already there, move to the beginning of the line.
+Effectively toggle between the first non-whitespace character and
+the beginning of the line.
+
+If ARG is not nil or 1, move forward ARG - 1 lines first.  If
+point reaches the beginning or end of the buffer, stop there."
+  (interactive "^p")
+  (setq arg (or arg 1))
+
+  ;; Move lines first
+  (when (/= arg 1)
+    (let ((line-move-visual nil))
+      (forward-line (1- arg))))
+
+  (let ((orig-point (point)))
+    (back-to-indentation)
+    (when (= orig-point (point))
+      (move-beginning-of-line 1))))
+
+(global-set-key (kbd "C-a") 'smarter-move-beginning-of-line)
+(global-set-key (kbd "s-<left>") 'smarter-move-beginning-of-line)
+
+;; When popping the mark, continue popping until the cursor actually moves
+;; Also, if the last command was a copy - skip past all the expand-region cruft.
+(defadvice pop-to-mark-command (around ensure-new-position activate)
+  (let ((p (point)))
+    (when (eq last-command 'save-region-or-current-line)
+      ad-do-it
+      ad-do-it
+      ad-do-it)
+    (dotimes (i 10)
+      (when (= p (point)) ad-do-it))))
+
+;; Many commands in Emacs write the current position into mark ring.
+;; These custom functions allow for quick movement backward and forward.
+;; For example, if you were editing line 6, then did a search with Cmd+f, did something and want to come back,
+;; press Cmd+, to go back to line 6. Cmd+. to go forward.
+;; These keys are chosen because they are the same buttons as < and >, think of them as arrows.
+(defun my-pop-local-mark-ring ()
+  (interactive)
+  (set-mark-command t))
+
+(defun unpop-to-mark-command ()
+  "Unpop off mark ring. Does nothing if mark ring is empty."
+  (interactive)
+      (when mark-ring
+        (setq mark-ring (cons (copy-marker (mark-marker)) mark-ring))
+        (set-marker (mark-marker) (car (last mark-ring)) (current-buffer))
+        (when (null (mark t)) (ding))
+        (setq mark-ring (nbutlast mark-ring))
+        (goto-char (marker-position (car (last mark-ring))))))
+
+(global-set-key (kbd "s-,") 'my-pop-local-mark-ring)
+(global-set-key (kbd "s-.") 'unpop-to-mark-command)
+
+
+;; Same keys with Shift will move you back and forward between open buffers.
+(global-set-key (kbd "s-<") 'previous-buffer)
+(global-set-key (kbd "s->") 'next-buffer)
+
 
 ;; Highlight matching parentheses when moving over them
 (show-paren-mode)
+
+
+;; =================
+;; WINDOW MANAGEMENT
 
 ;; use ace-window
  (use-package ace-window
