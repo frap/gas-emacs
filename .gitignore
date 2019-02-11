@@ -1,2 +1,14 @@
 *~
 *.log
+\#*
+.org-id-locations
+custom.el
+elisp
+elpa-*
+history
+ido.last
+org-clock-save.el
+org-gcal/
+projectile-bookmarks.eld
+recentf
+

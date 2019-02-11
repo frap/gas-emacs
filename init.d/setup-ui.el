@@ -94,7 +94,7 @@
 
 
 ;; Every time a window is started, make sure it get maximized
-(add-to-list 'default-frame-alist '(fullscreen . maximized))
+;;(add-to-list 'default-frame-alist '(fullscreen . maximized))
 
 
 (provide 'setup-ui)

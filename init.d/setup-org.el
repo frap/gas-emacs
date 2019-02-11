@@ -1,4 +1,3 @@
-;; Timestamp: <>
 
 (use-package org
   :ensure org-plus-contrib        ; But it comes with Emacs now!?
@@ -9,16 +8,16 @@
   (add-to-list 'auto-mode-alist '(".*/[0-9]*$" . org-mode))   ;; Journal entries
   (add-hook 'org-mode-hook 'yas-minor-mode-on)
   :custom-face
-    (variable-pitch ((t (:family "Source Sans Pro" :height 160 :weight light))))
-    ;;(variable-pitch ((t (:family "Avenir Next" :height 160 :weight light))))
-    (fixed-pitch ((t (:family "Inconsolata"))))
-    (org-done ((t (:background "#E8E8E8" :foreground "#0E0E0E" :strike-through t :weight bold))))
-    (org-headline-done ((t (:foreground "#171717" :strike-through t))))
+  (variable-pitch ((t (:family "Source Sans Pro" :height 160 :weight light))))
+  ;;(variable-pitch ((t (:family "Avenir Next" :height 160 :weight light))))
+  (fixed-pitch ((t (:family "Inconsolata"))))
+  (org-done ((t (:background "#E8E8E8" :foreground "#0E0E0E" :strike-through t :weight bold))))
+  (org-headline-done ((t (:foreground "#171717" :strike-through t))))
 					; (org-document-title ((t (:foreground "#171717" :weight bold :height 1.5))))
-;  (org-level-1 ((t (:foreground "#171717" :weight bold :height 1.3))))
-;  (org-level-2 ((t (:foreground "yellow" :weight normal :height 1.2))))
-;  (org-level-3 ((t (:foreground "blue" :weight normal :height 1.1))))
-;  (org-image-actual-width '(600))
+                                        ;  (org-level-1 ((t (:foreground "#171717" :weight bold :height 1.3))))
+                                        ;  (org-level-2 ((t (:foreground "yellow" :weight normal :height 1.2))))
+                                        ;  (org-level-3 ((t (:foreground "blue" :weight normal :height 1.1))))
+                                        ;  (org-image-actual-width '(600))
   :bind (("C-c l" . org-store-link)
          ("C-c c" . org-capture)
          ("C-M-|" . indent-rigidly)
@@ -72,15 +71,15 @@
                           nil)))))
 
   (add-to-list 'org-structure-template-alist '("el" "#+BEGIN_SRC emacs-lisp :tangle yes?\n\n#+END_SRC"))
- ;  (define-key org-mode-map (kbd "M-C-u") 'outline-up-heading)
-;  (define-key org-mode-map (kbd "M-C-w") 'org-table-copy-region)
- ; (define-key org-mode-map (kbd "M-C-y") 'org-table-paste-rectangle)
+                                        ;  (define-key org-mode-map (kbd "M-C-u") 'outline-up-heading)
+                                        ;  (define-key org-mode-map (kbd "M-C-w") 'org-table-copy-region)
+                                        ; (define-key org-mode-map (kbd "M-C-y") 'org-table-paste-rectangle)
 
   (define-key org-mode-map [remap org-return] (lambda () (interactive)
                                                 (if (org-in-src-block-p)
-                                                   (org-return)
+                                                    (org-return)
                                                   (org-return-indent))))
-)
+  )
 
 (setq org-agenda-files
       (quote ("~/Dropbox/GTD/atea.org"
@@ -220,6 +219,7 @@
                             ("@ferme"  . ?f)
                             (:newline)
                             ("ATTENTE"  . ?w)
+                            ("DAILY"    . ?d)
                             ("SUSPENDUE" . ?H)
                             ("ANNULÉ"    . ?c)
                             ("RÉUNION"   . ?m)
@@ -279,53 +279,60 @@
         "----------------")))
 
 (setq org-agenda-custom-commands
-  (quote
-   (
-   (" " "Agenda"
+      (quote
+       (
+        ("h" "Daily habits"
+         ((agenda ""))
+         ((org-agenda-show-log t)
+          (org-agenda-ndays 7)
+          (org-agenda-log-mode-items '(state))
+          (org-agenda-skip-function '(org-agenda-skip-entry-if 'notregexp ":DAILY:"))))
+        ;; other commands here
+        (" " "Agenda"
          ((agenda "" nil)
-         (tags "REFILE"
-               ((org-agenda-overriding-header "Tâches à la Représenter")
+          (tags "REFILE"
+                ((org-agenda-overriding-header "Tâches à la Représenter")
                  (org-tags-match-list-sublevels nil)))
-         (tags-todo "-ANNULÉ/!PROCHAIN"
-                        ((org-agenda-overriding-header "Tâches Courante")
-                         (org-tags-match-list-sublevels nil)
-                         (org-agenda-sorting-strategy
-                               '(todo-state-down priority-down category-keep))))
-         (tags-todo "-ATTENTE-ANNULÉ/!"
-               ((org-agenda-overriding-header "Projets")
-             ;   (org-agenda-skip-function #'gas/skip-non-projects)
-                (org-tags-match-list-sublevels 'indented)
-                (org-agenda-sorting-strategy
-                             '(category-keep))))
-         (tags-todo "-ANNULÉ/!"
-               ((org-agenda-overriding-header "Projets Bloqués")
-             ;   (org-agenda-skip-function #'gas/skip-non-stuck-projects)
-                (org-agenda-sorting-strategy
-                             '(category-keep))))
-         (tags-todo "-ANNULÉ+ATTENTE|SUSPENDUE/!"
-                   ((org-agenda-overriding-header "Attente ou Reporté Tâches")
-                     ))
-         (tags-todo "-SUSPENDUE-ANNULÉ-ATTENTE/+TODO"
-               ((org-agenda-overriding-header "Tâches n'appartenant pas à un Projet")
-              ;  (org-agenda-skip-function
-              ;  (org-query-select "headline" (org-query-gtd-loose-task)))
-                (org-agenda-skip-function '(org-agenda-skip-entry-if 'deadline 'scheduled))))
-         (tags-todo "/+PROCHAIN"
-              ((org-agenda-overriding-header "Tâches à Venir en Projets actifs")
-            ;   (org-agenda-skip-function (org-query-select "headline" (org-query-gtd-active-project-next-task)))
-               (org-tags-match-list-sublevels t)
-               (org-agenda-todo-ignore-scheduled 't)
-               (org-agenda-todo-ignore-deadlines 't)
-               (org-agenda-todo-ignore-with-date 't)
-               (org-agenda-sorting-strategy
-                '(todo-state-down effort-up category-keep))))
+          (tags-todo "-ANNULÉ/!PROCHAIN"
+                     ((org-agenda-overriding-header "Tâches Courante")
+                      (org-tags-match-list-sublevels nil)
+                      (org-agenda-sorting-strategy
+                       '(todo-state-down priority-down category-keep))))
+          (tags-todo "-ATTENTE-ANNULÉ/!"
+                     ((org-agenda-overriding-header "Projets")
+                                        ;   (org-agenda-skip-function #'gas/skip-non-projects)
+                      (org-tags-match-list-sublevels 'indented)
+                      (org-agenda-sorting-strategy
+                       '(category-keep))))
+          (tags-todo "-ANNULÉ/!"
+                     ((org-agenda-overriding-header "Projets Bloqués")
+                                        ;   (org-agenda-skip-function #'gas/skip-non-stuck-projects)
+                      (org-agenda-sorting-strategy
+                       '(category-keep))))
+          (tags-todo "-ANNULÉ+ATTENTE|SUSPENDUE/!"
+                     ((org-agenda-overriding-header "Attente ou Reporté Tâches")
+                      ))
+          (tags-todo "-SUSPENDUE-ANNULÉ-ATTENTE/+TODO"
+                     ((org-agenda-overriding-header "Tâches n'appartenant pas à un Projet")
+                                        ;  (org-agenda-skip-function
+                                        ;  (org-query-select "headline" (org-query-gtd-loose-task)))
+                      (org-agenda-skip-function '(org-agenda-skip-entry-if 'deadline 'scheduled))))
+          (tags-todo "/+PROCHAIN"
+                     ((org-agenda-overriding-header "Tâches à Venir en Projets actifs")
+                                        ;   (org-agenda-skip-function (org-query-select "headline" (org-query-gtd-active-project-next-task)))
+                      (org-tags-match-list-sublevels t)
+                      (org-agenda-todo-ignore-scheduled 't)
+                      (org-agenda-todo-ignore-deadlines 't)
+                      (org-agenda-todo-ignore-with-date 't)
+                      (org-agenda-sorting-strategy
+                       '(todo-state-down effort-up category-keep))))
           (tags-todo "/!PROCHAIN"
-              ((org-agenda-overriding-header "Projets actifs avec des tâches à venir")
-             ;  (org-agenda-skip-function (org-query-select "tree" (org-query-gtd-active-project-armed)))
-               (org-tags-match-list-sublevels 't)
-               (org-agenda-sorting-strategy
-                '(category-keep))))
-         nil)))))
+                     ((org-agenda-overriding-header "Projets actifs avec des tâches à venir")
+                                        ;  (org-agenda-skip-function (org-query-select "tree" (org-query-gtd-active-project-armed)))
+                      (org-tags-match-list-sublevels 't)
+                      (org-agenda-sorting-strategy
+                       '(category-keep))))
+          nil)))))
 
 
 
